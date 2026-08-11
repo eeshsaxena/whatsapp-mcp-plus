@@ -1,0 +1,13 @@
+node_modules/
+dist/
+data/
+auth_info/
+*.log
+wa-logs.txt
+mcp-logs.txt
+.env
+.DS_Store
+
+# local reference clones (not part of the package)
+_ref-ts/
+_ref-go/

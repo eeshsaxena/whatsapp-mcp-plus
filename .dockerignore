@@ -1,0 +1,9 @@
+node_modules
+dist
+data
+auth_info
+_ref-ts
+_ref-go
+*.log
+.git
+.github

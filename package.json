@@ -1,0 +1,56 @@
+{
+  "name": "whatsapp-mcp-plus",
+  "version": "0.1.0",
+  "description": "A secure, zero-setup WhatsApp MCP server. Read-first and safe by default. Maintained successor to the abandoned lharries/whatsapp-mcp.",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "whatsapp-mcp-plus": "dist/index.js",
+    "wamcp": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "NOTICE",
+    "LICENSE"
+  ],
+  "scripts": {
+    "dev": "node --experimental-strip-types src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test:logic": "node test/logic-test.mjs",
+    "test:features": "node test/features-test.mjs",
+    "test:pure": "node test/pure-test.mjs",
+    "test:mcp": "node test/smoke-mcp.mjs",
+    "test:call": "node test/smoke-call.mjs",
+    "test": "npm run build && npm run test:pure && npm run test:logic && npm run test:features && npm run test:mcp",
+    "demo": "npm run build && node scripts/demo.mjs"
+  },
+  "keywords": [
+    "whatsapp",
+    "mcp",
+    "model-context-protocol",
+    "claude",
+    "baileys",
+    "ai",
+    "assistant"
+  ],
+  "author": "eeshsaxena",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.8.0",
+    "baileys": "^6.7.18",
+    "pino": "^9.6.0",
+    "qrcode-terminal": "^0.12.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.14",
+    "@types/qrcode-terminal": "^0.12.2",
+    "typescript": "^5.8.2"
+  }
+}

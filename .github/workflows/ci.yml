@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+      - run: npm ci
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Build
+        run: npm run build
+      # Deterministic, network-free tests (the MCP smoke test starts a WhatsApp
+      # connection attempt, so it is excluded from CI).
+      - name: Unit + logic tests
+        run: |
+          npm run test:pure
+          npm run test:logic
+          npm run test:features

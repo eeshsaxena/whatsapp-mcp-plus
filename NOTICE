@@ -1,0 +1,22 @@
+whatsapp-mcp-plus
+Copyright (c) 2026 Eesh Saxena
+
+This product includes software derived from the following open-source projects:
+
+1. whatsapp-mcp-ts (https://github.com/jlucaso1/whatsapp-mcp-ts)
+   Licensed under the ISC License.
+   The SQLite storage layer and Baileys connection/event-handling patterns in
+   src/db.ts and src/whatsapp/ are derived from this project.
+
+2. whatsapp-mcp (https://github.com/lharries/whatsapp-mcp)
+   Licensed under the MIT License.
+   The overall tool surface (search/list/send/download) and MCP tool naming
+   conventions were informed by this project.
+
+Underlying WhatsApp connectivity is provided by the Baileys library
+(https://github.com/WhiskeySockets/Baileys), licensed under the MIT License.
+
+WhatsApp is a trademark of Meta Platforms, Inc. This project is not affiliated
+with, endorsed by, or sponsored by WhatsApp or Meta. It uses an unofficial
+client library and is provided for personal, educational use. See README.md for
+the important Terms-of-Service and account-ban disclaimer.
