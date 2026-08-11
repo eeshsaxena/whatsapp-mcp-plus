@@ -5,6 +5,7 @@ import { spawnSync } from "node:child_process";
 import { config } from "../config.ts";
 import { logger } from "../logger.ts";
 import { getCachedMessage } from "./msgcache.ts";
+import { getRawMessage } from "../db.ts";
 import { detectMediaType } from "./parse.ts";
 
 /**
@@ -15,10 +16,12 @@ export async function downloadMessageMedia(
   sock: WASocket | null,
   messageId: string,
 ): Promise<{ path: string; mediaType: string }> {
-  const msg = getCachedMessage(messageId);
+  // Prefer the in-memory cache; fall back to the persisted proto so downloads
+  // work for any synced message, not just recent ones.
+  const msg = getCachedMessage(messageId) ?? getRawMessage(messageId) ?? undefined;
   if (!msg) {
     throw new Error(
-      "Message not in cache. Media download only works for recently received messages.",
+      "Message not found. It may predate history sync, or raw storage is disabled (WAMCP_STORE_RAW=0).",
     );
   }
   const mediaType = detectMediaType(msg) ?? "file";

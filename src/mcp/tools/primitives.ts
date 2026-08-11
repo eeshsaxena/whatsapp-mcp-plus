@@ -1,7 +1,8 @@
 import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { getSock } from "../../whatsapp/connection.ts";
-import { getMessageById } from "../../db.ts";
+import { getMessageById, getRawMessage } from "../../db.ts";
+import { getCachedMessage } from "../../whatsapp/msgcache.ts";
 import { reconstructKey } from "../../whatsapp/parse.ts";
 import {
   reactToMessage,
@@ -9,6 +10,7 @@ import {
   editMessage,
   markRead,
   forwardText,
+  forwardMessage,
 } from "../../whatsapp/actions.ts";
 import { assertMutationsAllowed, guardedSend } from "../../safety/index.ts";
 import { textResult, jsonResult, safeHandler, errorResult } from "../format.ts";
@@ -97,12 +99,17 @@ export function registerPrimitiveTools(server: McpServer): void {
       const row = getMessageById(message_id);
       if (!row) return errorResult(`Unknown message id ${message_id}`);
       const jid = recipient.includes("@") ? recipient : `${recipient.replace(/[^0-9]/g, "")}@s.whatsapp.net`;
+      // Prefer a true native forward (keeps media) when we still have the proto;
+      // otherwise fall back to re-sending the stored text.
+      const original = getCachedMessage(message_id) ?? getRawMessage(message_id);
       const outcome = await guardedSend({
         action: "forward_message",
         recipient: jid,
-        description: `Forward message ${message_id} to ${jid}`,
+        description: `Forward message ${message_id} to ${jid}${original ? "" : " (text-only fallback)"}`,
         confirmToken: confirm_token,
-        run: () => forwardText(getSock(), jid, row.content),
+        run: () => original
+          ? forwardMessage(getSock(), jid, original)
+          : forwardText(getSock(), jid, row.content),
       });
       return jsonResult(outcome);
     }),

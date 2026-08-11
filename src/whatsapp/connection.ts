@@ -15,6 +15,7 @@ import {
   storeMessage,
   storeChat,
   storeContact,
+  encodeRawMessage,
 } from "../db.ts";
 import { parseMessageForDb } from "./parse.ts";
 import { rememberMessage } from "./msgcache.ts";
@@ -59,8 +60,12 @@ export async function startWhatsAppConnection(logger: Logger): Promise<WhatsAppS
         // Print a scannable QR directly in the terminal — no browser, no
         // third-party QR service (the base repo POSTed the QR to quickchart.io,
         // which leaks the pairing code to a remote host).
-        qrcode.generate(qr, { small: true });
-        logger.info("QR code printed to terminal. Scan it with WhatsApp > Linked Devices.");
+        // IMPORTANT: render the QR to stderr, never stdout. stdout is the MCP
+        // JSON-RPC transport and any stray bytes there corrupt the protocol.
+        qrcode.generate(qr, { small: true }, (art: string) => {
+          process.stderr.write("\n" + art + "\n");
+        });
+        logger.info("QR code printed to terminal (stderr). Scan it with WhatsApp > Linked Devices.");
       }
 
       if (connection === "close") {
@@ -101,7 +106,11 @@ export async function startWhatsAppConnection(logger: Logger): Promise<WhatsAppS
       for (const msg of messages) {
         rememberMessage(msg);
         const parsed = parseMessageForDb(msg);
-        if (parsed) { storeMessage(parsed); stored++; }
+        if (parsed) {
+          if (config.storeRaw) parsed.raw = encodeRawMessage(msg);
+          storeMessage(parsed);
+          stored++;
+        }
       }
       logger.info(`History sync: ${contacts.length} contacts, ${chats.length} chats, ${stored} messages.`);
     }
@@ -112,7 +121,10 @@ export async function startWhatsAppConnection(logger: Logger): Promise<WhatsAppS
         for (const msg of messages) {
           rememberMessage(msg);
           const parsed = parseMessageForDb(msg);
-          if (parsed) storeMessage(parsed);
+          if (parsed) {
+            if (config.storeRaw) parsed.raw = encodeRawMessage(msg);
+            storeMessage(parsed);
+          }
         }
       }
     }

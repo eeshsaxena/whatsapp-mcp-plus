@@ -132,6 +132,17 @@ export async function forwardText(
   return res?.key.id ?? undefined;
 }
 
+/** True native forward using the original message proto (incl. media). */
+export async function forwardMessage(
+  sock: WASocket | null,
+  toJid: string,
+  original: proto.IWebMessageInfo,
+): Promise<string | undefined> {
+  assertSock(sock);
+  const res = await sock.sendMessage(jidNormalizedUser(toJid), { forward: original });
+  return res?.key.id ?? undefined;
+}
+
 export async function markRead(sock: WASocket | null, keys: WAMessageKey[]): Promise<void> {
   assertSock(sock);
   await sock.readMessages(keys);

@@ -10,6 +10,7 @@ process.env.WAMCP_DATA_DIR = tmp;
 process.env.WAMCP_AUTH_DIR = path.join(tmp, "auth");
 const db = await import("../dist/db.js");
 const { renderWrappedSVG } = await import("../dist/analytics/card.js");
+const { proto } = await import("baileys");
 
 let pass = 0;
 const check = (name, cond) => { assert.ok(cond, name); console.log(`  ok  ${name}`); pass++; };
@@ -71,6 +72,21 @@ check("card is valid svg root", svg.startsWith("<?xml") && svg.includes("<svg"))
 check("card renders total message count", svg.includes(String(wrapped.totalMessages)));
 check("card includes a contact name", svg.includes("Carol"));
 check("card is well-formed (balanced svg tag)", svg.includes("</svg>"));
+
+// --- raw proto persistence round-trip ----------------------------------------
+const rawMsg = proto.WebMessageInfo.create({
+  key: { remoteJid: CHAT, id: "RAW1", fromMe: false },
+  message: { conversation: "hello raw proto" },
+  messageTimestamp: 1700000000,
+});
+const encoded = db.encodeRawMessage(rawMsg);
+check("encodeRawMessage returns a base64 string", typeof encoded === "string" && encoded.length > 0);
+db.storeMessage({ id: "RAW1", chat_jid: CHAT, sender: CHAT, content: "hello raw proto", timestamp: t(11, 0, 0), is_from_me: false, raw: encoded });
+const decoded = db.getRawMessage("RAW1");
+check("getRawMessage decodes back to a message", decoded !== null);
+check("decoded conversation matches", decoded?.message?.conversation === "hello raw proto");
+check("decoded key id matches", decoded?.key?.id === "RAW1");
+check("getRawMessage null for unknown id", db.getRawMessage("NOPE") === null);
 
 db.closeDatabase();
 fs.rmSync(tmp, { recursive: true, force: true });

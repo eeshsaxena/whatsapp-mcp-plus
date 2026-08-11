@@ -1,5 +1,6 @@
 import { DatabaseSync } from "node:sqlite";
 import path from "node:path";
+import { proto, type WAMessage } from "baileys";
 import { config, ensureDirs } from "./config.ts";
 
 /**
@@ -33,6 +34,8 @@ export interface Message {
   chat_name?: string | null;
   message_type?: string | null;
   media_type?: string | null;
+  /** base64 of the encoded proto.WebMessageInfo (for media download / forward). */
+  raw?: string | null;
 }
 
 let dbInstance: DatabaseSync | null = null;
@@ -67,6 +70,7 @@ export function initializeDatabase(): DatabaseSync {
       is_from_me INTEGER,
       message_type TEXT,
       media_type TEXT,
+      raw TEXT,
       PRIMARY KEY (id, chat_jid),
       FOREIGN KEY (chat_jid) REFERENCES chats(jid) ON DELETE CASCADE
     );
@@ -110,7 +114,7 @@ export function initializeDatabase(): DatabaseSync {
   db.exec(`CREATE INDEX IF NOT EXISTS idx_sent_log_ts ON sent_log (ts);`);
 
   // Best-effort migration for older DBs missing the new columns.
-  for (const col of ["message_type", "media_type"]) {
+  for (const col of ["message_type", "media_type", "raw"]) {
     try {
       db.exec(`ALTER TABLE messages ADD COLUMN ${col} TEXT`);
     } catch {
@@ -187,8 +191,8 @@ export function storeMessage(message: Message): void {
     storeChat({ jid: message.chat_jid, last_message_time: message.timestamp });
     const stmt = db.prepare(`
       INSERT OR REPLACE INTO messages
-        (id, chat_jid, sender, content, timestamp, is_from_me, message_type, media_type)
-      VALUES (@id, @chat_jid, @sender, @content, @timestamp, @is_from_me, @message_type, @media_type)
+        (id, chat_jid, sender, content, timestamp, is_from_me, message_type, media_type, raw)
+      VALUES (@id, @chat_jid, @sender, @content, @timestamp, @is_from_me, @message_type, @media_type, @raw)
     `);
     stmt.run({
       id: message.id,
@@ -199,6 +203,7 @@ export function storeMessage(message: Message): void {
       is_from_me: message.is_from_me ? 1 : 0,
       message_type: message.message_type ?? null,
       media_type: message.media_type ?? null,
+      raw: message.raw ?? null,
     });
     db.prepare(`
       UPDATE chats
@@ -373,6 +378,30 @@ export function getMessageById(messageId: string): Message | null {
     return row ? rowToMessage(row) : null;
   } catch (e) {
     console.error("getMessageById error", e);
+    return null;
+  }
+}
+
+/** Encode a raw Baileys message to a base64 string for storage. */
+export function encodeRawMessage(msg: WAMessage): string | null {
+  try {
+    return Buffer.from(proto.WebMessageInfo.encode(msg as any).finish()).toString("base64");
+  } catch {
+    return null;
+  }
+}
+
+/** Decode a stored raw message back into a Baileys WAMessage, or null. */
+export function getRawMessage(messageId: string): WAMessage | null {
+  const db = getDb();
+  try {
+    const row = db.prepare(
+      `SELECT raw FROM messages WHERE id = ? AND raw IS NOT NULL LIMIT 1`,
+    ).get(messageId) as any | undefined;
+    if (!row?.raw) return null;
+    return proto.WebMessageInfo.decode(Buffer.from(row.raw, "base64")) as WAMessage;
+  } catch (e) {
+    console.error("getRawMessage error", e);
     return null;
   }
 }

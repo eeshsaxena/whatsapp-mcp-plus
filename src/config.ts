@@ -41,6 +41,8 @@ export interface Config {
   openQrInBrowser: boolean;
   /** Optional path to a whisper-compatible transcription binary/endpoint. */
   transcriptionCmd: string | null;
+  /** Persist the raw encoded message proto so media/forward work for old messages. */
+  storeRaw: boolean;
 }
 
 function resolveMode(): SafetyMode {
@@ -94,6 +96,7 @@ export const config: Config = {
   },
   openQrInBrowser: envBool("WAMCP_OPEN_QR_BROWSER", false),
   transcriptionCmd: process.env.WAMCP_TRANSCRIPTION_CMD || null,
+  storeRaw: envBool("WAMCP_STORE_RAW", true),
 };
 
 export function ensureDirs(): void {
