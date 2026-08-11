@@ -1,6 +1,10 @@
 import { z } from "zod";
+import fs from "node:fs";
+import path from "node:path";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { computeWrapped, computeResponseLeaderboard } from "../../db.ts";
+import { renderWrappedSVG } from "../../analytics/card.ts";
+import { config } from "../../config.ts";
 import { jsonResult, textResult, safeHandler } from "../format.ts";
 
 /** Turn a period keyword into an ISO "since" cutoff. */
@@ -42,6 +46,28 @@ function renderCard(stats: ReturnType<typeof computeWrapped>, period: string): s
 }
 
 export function registerAnalyticsTools(server: McpServer): void {
+  server.tool(
+    "wrapped_card",
+    {
+      period: z.enum(["week", "month", "year", "all"]).default("all"),
+      output_path: z.string().optional().describe("Where to write the .svg (defaults to the data dir)"),
+      title: z.string().optional(),
+      subtitle: z.string().optional(),
+    },
+    safeHandler(async ({ period, output_path, title, subtitle }: any) => {
+      const stats = computeWrapped(periodToSince(period), 10);
+      const svg = renderWrappedSVG(stats, { title, subtitle });
+      const out = output_path || path.join(config.dataDir, `whatsapp-wrapped-${period}.svg`);
+      fs.mkdirSync(path.dirname(out), { recursive: true });
+      fs.writeFileSync(out, svg, "utf-8");
+      return jsonResult({
+        path: out,
+        note: "Shareable SVG card written. Open it or convert to PNG to post.",
+        stats: { total: stats.totalMessages, sent: stats.sent, received: stats.received },
+      });
+    }),
+  );
+
   server.tool(
     "response_leaderboard",
     {

@@ -9,6 +9,7 @@ const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "wamcp-feat-"));
 process.env.WAMCP_DATA_DIR = tmp;
 process.env.WAMCP_AUTH_DIR = path.join(tmp, "auth");
 const db = await import("../dist/db.js");
+const { renderWrappedSVG } = await import("../dist/analytics/card.js");
 
 let pass = 0;
 const check = (name, cond) => { assert.ok(cond, name); console.log(`  ok  ${name}`); pass++; };
@@ -62,6 +63,14 @@ check("export text format has bracketed timestamp", /\[\d{4}-\d{2}-\d{2}/.test(t
 const lb = db.computeResponseLeaderboard(1, 15);
 check("leaderboard ranks Carol with my avg 60s", lb.fastest.some((e) => e.name === "Carol" && e.avgMyResponseSec === 60));
 check("leaderboard excludes group chats", !lb.fastest.some((e) => e.jid.endsWith("@g.us")));
+
+// --- SVG wrapped card ---------------------------------------------------------
+const wrapped = db.computeWrapped(null, 10);
+const svg = renderWrappedSVG(wrapped, { subtitle: "test" });
+check("card is valid svg root", svg.startsWith("<?xml") && svg.includes("<svg"));
+check("card renders total message count", svg.includes(String(wrapped.totalMessages)));
+check("card includes a contact name", svg.includes("Carol"));
+check("card is well-formed (balanced svg tag)", svg.includes("</svg>"));
 
 db.closeDatabase();
 fs.rmSync(tmp, { recursive: true, force: true });

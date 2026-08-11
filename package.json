@@ -25,7 +25,8 @@
     "test:mcp": "node test/smoke-mcp.mjs",
     "test:call": "node test/smoke-call.mjs",
     "test": "npm run build && npm run test:pure && npm run test:logic && npm run test:features && npm run test:mcp",
-    "demo": "npm run build && node scripts/demo.mjs"
+    "demo": "npm run build && node scripts/demo.mjs",
+    "card": "npm run build && node scripts/gen-sample-card.mjs"
   },
   "keywords": [
     "whatsapp",

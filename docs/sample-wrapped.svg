@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="620" height="820" viewBox="0 0 620 820" font-family="-apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+  <rect width="620" height="820" rx="28" fill="#0b141a"/>
+  <rect x="24" y="24" width="572" height="772" rx="20" fill="#111b21"/>
+
+  <text x="56" y="92" fill="#25D366" font-size="18" font-weight="700" letter-spacing="3">WHATSAPP</text>
+  <text x="56" y="132" fill="#e9edef" font-size="40" font-weight="800">WhatsApp Wrapped</text>
+  <text x="56" y="162" fill="#8696a0" font-size="18">2026 · sample data</text>
+
+  <text x="56" y="250" fill="#8696a0" font-size="16">TOTAL MESSAGES</text>
+  <text x="56" y="316" fill="#e9edef" font-size="72" font-weight="800">1,371</text>
+
+  <g>
+    <text x="330" y="250" fill="#8696a0" font-size="16">SENT</text>
+    <text x="330" y="292" fill="#25D366" font-size="34" font-weight="700">686</text>
+    <text x="470" y="250" fill="#8696a0" font-size="16">RECEIVED</text>
+    <text x="470" y="292" fill="#e9edef" font-size="34" font-weight="700">685</text>
+  </g>
+
+  <line x1="56" y1="352" x2="564" y2="352" stroke="#20303a" stroke-width="1"/>
+
+  <g>
+    <text x="56" y="392" fill="#8696a0" font-size="16">BUSIEST HOUR</text>
+    <text x="56" y="424" fill="#e9edef" font-size="26" font-weight="700">2PM</text>
+    <text x="240" y="392" fill="#8696a0" font-size="16">BUSIEST DAY</text>
+    <text x="240" y="424" fill="#e9edef" font-size="26" font-weight="700">Fri</text>
+    <text x="420" y="392" fill="#8696a0" font-size="16">ACTIVE CHATS</text>
+    <text x="420" y="424" fill="#e9edef" font-size="26" font-weight="700">5</text>
+  </g>
+
+  <text x="56" y="452" fill="#8696a0" font-size="16">TOP PEOPLE</text>
+  
+      <text x="56" y="468" fill="#e9edef" font-size="20" font-weight="600">1. Mom</text>
+      <rect x="300" y="452" width="260" height="20" rx="10" fill="#20303a"/>
+      <rect x="300" y="452" width="250" height="20" rx="10" fill="#25D366"/>
+      <text x="568" y="468" fill="#8696a0" font-size="16" text-anchor="end">412</text>
+      <text x="56" y="514" fill="#e9edef" font-size="20" font-weight="600">2. Aisha ❤</text>
+      <rect x="300" y="498" width="260" height="20" rx="10" fill="#20303a"/>
+      <rect x="300" y="498" width="235" height="20" rx="10" fill="#25D366"/>
+      <text x="568" y="514" fill="#8696a0" font-size="16" text-anchor="end">388</text>
+      <text x="56" y="560" fill="#e9edef" font-size="20" font-weight="600">3. Study Group</text>
+      <rect x="300" y="544" width="260" height="20" rx="10" fill="#20303a"/>
+      <rect x="300" y="544" width="166" height="20" rx="10" fill="#25D366"/>
+      <text x="568" y="560" fill="#8696a0" font-size="16" text-anchor="end">274</text>
+      <text x="56" y="606" fill="#e9edef" font-size="20" font-weight="600">4. Rohan</text>
+      <rect x="300" y="590" width="260" height="20" rx="10" fill="#20303a"/>
+      <rect x="300" y="590" width="122" height="20" rx="10" fill="#25D366"/>
+      <text x="568" y="606" fill="#8696a0" font-size="16" text-anchor="end">201</text>
+      <text x="56" y="652" fill="#e9edef" font-size="20" font-weight="600">5. Coach</text>
+      <rect x="300" y="636" width="260" height="20" rx="10" fill="#20303a"/>
+      <rect x="300" y="636" width="58" height="20" rx="10" fill="#25D366"/>
+      <text x="568" y="652" fill="#8696a0" font-size="16" text-anchor="end">96</text>
+
+  <text x="56" y="716" fill="#8696a0" font-size="16">TOP EMOJIS</text>
+  <text x="64" y="748" font-size="40" text-anchor="middle">👍</text>
+     <text x="64" y="778" fill="#8696a0" font-size="15" text-anchor="middle">172</text><text x="156" y="748" font-size="40" text-anchor="middle">😭</text>
+     <text x="156" y="778" fill="#8696a0" font-size="15" text-anchor="middle">172</text><text x="248" y="748" font-size="40" text-anchor="middle">🔥</text>
+     <text x="248" y="778" fill="#8696a0" font-size="15" text-anchor="middle">172</text><text x="340" y="748" font-size="40" text-anchor="middle">✨</text>
+     <text x="340" y="778" fill="#8696a0" font-size="15" text-anchor="middle">171</text><text x="432" y="748" font-size="40" text-anchor="middle">💀</text>
+     <text x="432" y="778" fill="#8696a0" font-size="15" text-anchor="middle">171</text><text x="524" y="748" font-size="40" text-anchor="middle">🙏</text>
+     <text x="524" y="778" fill="#8696a0" font-size="15" text-anchor="middle">171</text>
+
+  <text x="564" y="780" fill="#8696a0" font-size="14" text-anchor="end">whatsapp-mcp-plus</text>
+</svg>
