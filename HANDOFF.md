@@ -16,14 +16,19 @@ Strategy + research rationale live in `BUILD_PLAN.md`.
   (ISC), extended in place. Attribution in NOTICE/LICENSE.
 - **Full codebase written** (`src/`): config + safety, node:sqlite storage,
   Baileys connection/parse/actions/media/msgcache, MCP server + 8 tool modules.
-- **48 MCP tools** register and list correctly over stdio (incumbent had 12).
+- **51 MCP tools** register and list correctly over stdio (incumbent had 12).
   Read/send/primitives/groups/presence + location/poll/contact/list_groups +
   chat mgmt (pin/mute/block/star/check-number/profile-pic/profile-status) +
-  analytics (whatsapp_wrapped, response_leaderboard, chat_stats with response
-  times, export_chat).
+  analytics (whatsapp_wrapped, **wrapped_card shareable SVG**, response_leaderboard,
+  top_words, chat_stats with response times, export_chat) + get_me.
+- **Raw proto persistence** (WAMCP_STORE_RAW): media download + true native
+  forward work for any synced message, not just in-memory recent ones.
 - **Packaging:** bin shebang survives build (npx works), Dockerfile + .dockerignore,
-  GitHub Actions CI (.github/workflows/ci.yml), `npm run demo` prints real
-  analytics from seeded data (for README screenshots).
+  GitHub Actions CI, `npm run demo` + `npm run card` generate real analytics /
+  the shareable SVG (docs/sample-wrapped.svg) for README/launch screenshots.
+- **Fixed:** QR was printed to stdout, corrupting the MCP transport (would break
+  Claude Desktop pairing). Now on stderr. Caught by the MCP smoke test.
+- **LAUNCH.md**: concrete 3-day launch plan. **CHANGELOG.md** written.
 - `npm install` clean (0 vulns). `tsc --noEmit` clean. `tsc` build → `dist/` clean
   (import extensions rewritten `.ts`→`.js`).
 - **Runtime verified without WhatsApp:**
@@ -31,12 +36,12 @@ Strategy + research rationale live in `BUILD_PLAN.md`.
   - `get_status` → correct safety/connection JSON.
   - `whatsapp_wrapped` → renders the shareable card (empty DB).
   - `send_message` in read-only mode → correctly BLOCKED by the safety gate.
-- **Test suite (`npm test`): 49 checks pass** across `test/pure-test.mjs`
-  (injection scanner + recipient normalization, 13), `test/logic-test.mjs`
-  (DB reads/allowlist/rate/wrapped, 18), `test/features-test.mjs`
-  (chat_stats response times, export, date range, contact_info, leaderboard, 18),
-  plus `test/smoke-mcp.mjs` (tools/list = 48) and `test/smoke-call.mjs` (live calls
-  + read-only block). None require WhatsApp. CI runs the deterministic subset.
+- **Test suite (`npm test`): 75 checks pass** across `test/pure-test.mjs` (13),
+  `test/safety-test.mjs` (mode/allowlist/rate/confirm gate, 13),
+  `test/logic-test.mjs` (22), `test/features-test.mjs` (chat_stats response times,
+  export, date range, leaderboard, SVG card, proto round-trip, 27), plus
+  `test/smoke-mcp.mjs` (tools/list = 51) and `test/smoke-call.mjs` (live calls +
+  read-only block). None require WhatsApp. CI runs the deterministic subset.
 
 ### NOT yet tested (needs YOU — requires a live WhatsApp pairing / QR scan)
 Everything that actually talks to WhatsApp. I cannot scan the QR with your phone.

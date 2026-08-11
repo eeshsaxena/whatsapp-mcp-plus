@@ -22,13 +22,15 @@ async function main(): Promise<void> {
   logger.info(`Starting whatsapp-mcp-plus | ${describeSafety()}`);
   initializeDatabase();
 
-  try {
-    await startWhatsAppConnection(waLogger);
-  } catch (err) {
-    logger.error({ err }, "WhatsApp connection failed to start; MCP tools will report disconnected.");
-  }
-
+  // Start the MCP server FIRST so a client can connect and call tools
+  // immediately (they report "not connected" until WhatsApp is ready). The
+  // WhatsApp connection then proceeds in the background — never block the
+  // protocol on a network call.
   await startMcpServer(logger);
+
+  startWhatsAppConnection(waLogger).catch((err) => {
+    logger.error({ err }, "WhatsApp connection failed to start; MCP tools will report disconnected.");
+  });
 }
 
 function shutdown(): void {

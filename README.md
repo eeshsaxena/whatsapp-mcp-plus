@@ -16,13 +16,23 @@ layer it never had.
 > get your number banned. This tool is designed to minimize that risk, but cannot
 > eliminate it.
 
+## WhatsApp Wrapped, from your own chats
+
+Ask your AI for `whatsapp_wrapped` (a terminal card) or `wrapped_card` (a
+shareable SVG). Sample output on demo data:
+
+<img src="docs/sample-wrapped.svg" alt="WhatsApp Wrapped sample card" width="360">
+
+Also: `response_leaderboard` (who you reply to fastest / leave on read longest),
+`chat_stats` (per-chat, with reply times), `top_words`, and `export_chat`.
+
 ## Why this instead of the original
 
 | | original (abandoned) | whatsapp-mcp-plus |
 | --- | --- | --- |
 | Setup | Go bridge **+** Python server, hand-edited config, CGO on Windows | single Node process, one command |
 | Safety | none (README even warns about the hole) | read-only default, allowlist, rate limits, confirm-to-send, injection guard |
-| Tools | 12 (read + basic send) | 48 (react, reply, edit, delete, groups, presence, polls, transcription, analytics, chat mgmt) |
+| Tools | 12 (read + basic send) | 51 (react, reply, edit, delete, groups, presence, polls, transcription, analytics, chat mgmt) |
 | Native deps | `go-sqlite3` (needs a C compiler) | none — uses Node's built-in `node:sqlite` |
 | Maintained | last commit Jul 2025 | yes |
 
@@ -96,7 +106,7 @@ Every knob is an env var: `WAMCP_ALLOWLIST_ONLY`, `WAMCP_REQUIRE_CONFIRM`,
 
 ## Tools
 
-48 tools (the abandoned original had 12):
+51 tools (the abandoned original had 12):
 
 **Read:** `search_contacts`, `list_chats`, `list_groups`, `get_chat`,
 `list_messages` (with date range), `get_last_interaction`, `contact_info`,
@@ -111,10 +121,12 @@ Every knob is an env var: `WAMCP_ALLOWLIST_ONLY`, `WAMCP_REQUIRE_CONFIRM`,
 `check_number_on_whatsapp`, `get_profile_picture`
 **Presence / profile:** `send_presence`, `set_profile_status`, `set_profile_name`
 **Media / intelligence:** `download_media`, `transcribe_voice_message`
-**Analytics:** `whatsapp_wrapped` (shareable stats card), `response_leaderboard`
-(who you reply to fastest / leave on read longest), `chat_stats` (per-chat, incl.
-response times), `export_chat` (markdown/text transcript)
-**Control:** `get_status`, `set_mode`, `confirm_action`, `allowlist_add/remove/list`
+**Analytics:** `whatsapp_wrapped` (stats card), `wrapped_card` (shareable SVG),
+`response_leaderboard` (who you reply to fastest / leave on read longest),
+`top_words`, `chat_stats` (per-chat, incl. response times), `export_chat`
+(markdown/text transcript)
+**Control:** `get_status`, `get_me`, `set_mode`, `confirm_action`,
+`allowlist_add/remove/list`
 
 ### Voice transcription
 

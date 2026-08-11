@@ -22,9 +22,10 @@
     "test:logic": "node test/logic-test.mjs",
     "test:features": "node test/features-test.mjs",
     "test:pure": "node test/pure-test.mjs",
+    "test:safety": "node test/safety-test.mjs",
     "test:mcp": "node test/smoke-mcp.mjs",
     "test:call": "node test/smoke-call.mjs",
-    "test": "npm run build && npm run test:pure && npm run test:logic && npm run test:features && npm run test:mcp",
+    "test": "npm run build && npm run test:pure && npm run test:safety && npm run test:logic && npm run test:features && npm run test:mcp",
     "demo": "npm run build && node scripts/demo.mjs",
     "card": "npm run build && node scripts/gen-sample-card.mjs"
   },
