@@ -35,6 +35,19 @@ export function registerAdminTools(server: McpServer): void {
   );
 
   server.tool(
+    "get_me",
+    {},
+    safeHandler(async () => {
+      const sock = getSock();
+      return jsonResult({
+        jid: sock?.user?.id ?? null,
+        name: sock?.user?.name ?? null,
+        connected: Boolean(sock?.user),
+      });
+    }),
+  );
+
+  server.tool(
     "set_mode",
     { mode: z.enum(["read-only", "assisted", "unrestricted"]) },
     safeHandler(async ({ mode }: any) => {

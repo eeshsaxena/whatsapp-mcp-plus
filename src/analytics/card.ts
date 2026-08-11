@@ -67,6 +67,7 @@ export function renderWrappedSVG(stats: WrappedStats, opts: CardOptions = {}): s
   <text x="56" y="92" fill="${accent}" font-size="18" font-weight="700" letter-spacing="3">WHATSAPP</text>
   <text x="56" y="132" fill="${fg}" font-size="40" font-weight="800">${esc(title)}</text>
   <text x="56" y="162" fill="${muted}" font-size="18">${esc(subtitle)}</text>
+  <text x="56" y="192" fill="${accent}" font-size="16" font-weight="600">${stats.wordsSent.toLocaleString()} words sent · ${stats.longestStreakDays}-day streak</text>
 
   <text x="56" y="250" fill="${muted}" font-size="16">TOTAL MESSAGES</text>
   <text x="56" y="316" fill="${fg}" font-size="72" font-weight="800">${stats.totalMessages.toLocaleString()}</text>

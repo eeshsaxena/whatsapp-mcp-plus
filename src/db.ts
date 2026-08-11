@@ -528,6 +528,48 @@ export interface WrappedStats {
   busiestDay: { day: string; count: number } | null;
   topEmojis: { emoji: string; count: number }[];
   activeChats: number;
+  wordsSent: number;
+  longestStreakDays: number;
+}
+
+const STOPWORDS = new Set([
+  "the", "and", "you", "for", "are", "but", "not", "was", "this", "that", "with",
+  "have", "your", "will", "can", "just", "get", "got", "its", "it's", "i'm", "im",
+  "was", "yeah", "yes", "no", "ok", "okay", "lol", "haha", "hey", "hi", "hello",
+  "there", "what", "when", "how", "why", "who", "all", "any", "out", "now", "one",
+  "about", "like", "know", "dont", "don't", "cant", "can't", "would", "could",
+  "should", "from", "they", "them", "then", "than", "here", "some", "want", "going",
+]);
+
+/** Word-frequency across messages (optionally a single chat), stopword filtered. */
+export function computeTopWords(
+  chatJid?: string | null,
+  limit = 20,
+  sinceIso?: string | null,
+): { word: string; count: number }[] {
+  const db = getDb();
+  const since = sinceIso ?? "1970-01-01T00:00:00.000Z";
+  let sql = `SELECT content FROM messages WHERE timestamp >= ?`;
+  const params: (string | number)[] = [since];
+  if (chatJid) { sql += ` AND chat_jid = ?`; params.push(chatJid); }
+  const rows = db.prepare(sql).all(...params) as any[];
+
+  const counts: Record<string, number> = {};
+  for (const r of rows) {
+    const words = String(r.content || "")
+      .toLowerCase()
+      .replace(/\[[^\]]*\]/g, " ") // strip our [Image]/[Voice]/... markers
+      .match(/[a-z']{3,}/g);
+    if (!words) continue;
+    for (const w of words) {
+      if (STOPWORDS.has(w)) continue;
+      counts[w] = (counts[w] ?? 0) + 1;
+    }
+  }
+  return Object.entries(counts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, limit)
+    .map(([word, count]) => ({ word, count }));
 }
 
 export function computeWrapped(sinceIso?: string | null, topN = 10): WrappedStats {
@@ -595,6 +637,32 @@ export function computeWrapped(sinceIso?: string | null, topN = 10): WrappedStat
     .slice(0, topN)
     .map(([emoji, count]) => ({ emoji, count }));
 
+  // Words I sent.
+  const myContent = db.prepare(
+    `SELECT content FROM messages WHERE is_from_me = 1 AND timestamp >= ?`,
+  ).all(since) as any[];
+  let wordsSent = 0;
+  for (const r of myContent) {
+    const m = String(r.content || "").replace(/\[[^\]]*\]/g, " ").match(/\S+/g);
+    if (m) wordsSent += m.length;
+  }
+
+  // Longest streak of consecutive active days.
+  const daySet = new Set<string>();
+  for (const r of rows) {
+    const d = parseDateSafe(r.timestamp);
+    if (d) daySet.add(d.toISOString().slice(0, 10));
+  }
+  const sortedDays = [...daySet].sort();
+  let longestStreakDays = sortedDays.length ? 1 : 0;
+  let run = sortedDays.length ? 1 : 0;
+  for (let i = 1; i < sortedDays.length; i++) {
+    const prev = new Date(sortedDays[i - 1]!).getTime();
+    const cur = new Date(sortedDays[i]!).getTime();
+    if (cur - prev === 864e5) { run++; longestStreakDays = Math.max(longestStreakDays, run); }
+    else run = 1;
+  }
+
   return {
     totalMessages: totals?.total ?? 0,
     sent: totals?.sent ?? 0,
@@ -606,6 +674,8 @@ export function computeWrapped(sinceIso?: string | null, topN = 10): WrappedStat
     busiestDay,
     topEmojis,
     activeChats: totals?.active_chats ?? 0,
+    wordsSent,
+    longestStreakDays,
   };
 }
 

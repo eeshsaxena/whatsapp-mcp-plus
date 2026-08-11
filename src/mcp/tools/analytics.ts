@@ -2,7 +2,7 @@ import { z } from "zod";
 import fs from "node:fs";
 import path from "node:path";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { computeWrapped, computeResponseLeaderboard } from "../../db.ts";
+import { computeWrapped, computeResponseLeaderboard, computeTopWords } from "../../db.ts";
 import { renderWrappedSVG } from "../../analytics/card.ts";
 import { config } from "../../config.ts";
 import { jsonResult, textResult, safeHandler } from "../format.ts";
@@ -65,6 +65,18 @@ export function registerAnalyticsTools(server: McpServer): void {
         note: "Shareable SVG card written. Open it or convert to PNG to post.",
         stats: { total: stats.totalMessages, sent: stats.sent, received: stats.received },
       });
+    }),
+  );
+
+  server.tool(
+    "top_words",
+    {
+      chat_jid: z.string().optional().describe("Restrict to one chat; omit for all chats"),
+      period: z.enum(["week", "month", "year", "all"]).default("all"),
+      limit: z.number().int().positive().max(50).default(20),
+    },
+    safeHandler(async ({ chat_jid, period, limit }: any) => {
+      return jsonResult(computeTopWords(chat_jid ?? null, limit, periodToSince(period)));
     }),
   );
 

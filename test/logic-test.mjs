@@ -70,6 +70,13 @@ check("wrapped activeChats = 2", w.activeChats === 2);
 check("wrapped topContacts excludes groups, includes Alice top", w.topContacts[0]?.count === 3);
 check("wrapped found emoji 😀 x2", w.topEmojis.some((e) => e.emoji === "😀" && e.count === 2));
 check("wrapped busiestHour computed", w.busiestHour !== null);
+check("wrapped wordsSent counts my words", w.wordsSent === 3);
+check("wrapped longestStreakDays = 1 (all same day)", w.longestStreakDays === 1);
+
+// --- top words ----------------------------------------------------------------
+const words = db.computeTopWords(null, 10);
+check("top_words finds 'lunch'", words.some((x) => x.word === "lunch"));
+check("top_words filters stopwords (no 'hey')", !words.some((x) => x.word === "hey"));
 
 // --- settings / mode persistence ---------------------------------------------
 db.setSetting("mode", "assisted");
