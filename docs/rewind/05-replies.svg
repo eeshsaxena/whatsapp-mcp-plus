@@ -1,27 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920" font-family="'SF Pro Display','Segoe UI Variable Display','Segoe UI',system-ui,sans-serif">
   <defs>
-    <linearGradient id="g5" x1="0" y1="0" x2="0.017" y2="0.629">
-      <stop offset="0" stop-color="#0b141a"/>
-      <stop offset="1" stop-color="#14532d"/>
+    <linearGradient id="bg-c5" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" stop-color="#04120b"/><stop offset="1" stop-color="#0a2c18"/>
     </linearGradient>
+    <radialGradient id="orb-c5-0"><stop offset="0" stop-color="#25D366" stop-opacity="0.9"/><stop offset="1" stop-color="#25D366" stop-opacity="0"/></radialGradient><radialGradient id="orb-c5-1"><stop offset="0" stop-color="#f59e0b" stop-opacity="0.9"/><stop offset="1" stop-color="#f59e0b" stop-opacity="0"/></radialGradient>
+    <filter id="soft-c5" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="120"/></filter>
+    <filter id="glow-c5" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="18"/></filter>
+    <filter id="grain-c5"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.5 0"/></filter>
   </defs>
-  <rect width="1080" height="1920" fill="url(#g5)"/>
+  <rect width="1080" height="1920" fill="url(#bg-c5)"/>
+  <circle cx="940" cy="640" r="340" fill="url(#orb-c5-0)" opacity="0.38" filter="url(#soft-c5)"/><circle cx="160" cy="1400" r="360" fill="url(#orb-c5-1)" opacity="0.3" filter="url(#soft-c5)"/>
   
-    <text x="80" y="300" fill="rgba(255,255,255,0.74)" font-size="34" font-weight="800" letter-spacing="6">REPLY SPEED</text>
-    <text x="80" y="470" fill="#F6F8F9" font-size="110" font-weight="900" letter-spacing="-2">Left on read?</text>
-
-    <text x="80" y="650" fill="#7CF3B0" font-size="46" font-weight="800">⚡ You reply fastest to</text>
-    <text x="80" y="760" fill="#F6F8F9" font-size="52" font-weight="800">1. Mom</text>
-      <text x="1000" y="760" fill="#7CF3B0" font-size="52" font-weight="900" text-anchor="end">40s</text><text x="80" y="890" fill="#F6F8F9" font-size="52" font-weight="800">2. Aisha ❤️</text>
-      <text x="1000" y="890" fill="#7CF3B0" font-size="52" font-weight="900" text-anchor="end">2m</text><text x="80" y="1020" fill="#F6F8F9" font-size="52" font-weight="800">3. Rohan</text>
-      <text x="1000" y="1020" fill="#7CF3B0" font-size="52" font-weight="900" text-anchor="end">4m</text>
-
-    <text x="80" y="1260" fill="#FFCE73" font-size="46" font-weight="800">🐌 You leave on read longest</text>
-    <text x="80" y="1370" fill="#F6F8F9" font-size="52" font-weight="800">1. Landlord</text>
-      <text x="1000" y="1370" fill="#FFCE73" font-size="52" font-weight="900" text-anchor="end">30m</text><text x="80" y="1500" fill="#F6F8F9" font-size="52" font-weight="800">2. Study Group</text>
-      <text x="1000" y="1500" fill="#FFCE73" font-size="52" font-weight="900" text-anchor="end">12m</text><text x="80" y="1630" fill="#F6F8F9" font-size="52" font-weight="800">3. Rohan</text>
-      <text x="1000" y="1630" fill="#FFCE73" font-size="52" font-weight="900" text-anchor="end">4m</text>
-  <text x="80" y="1830" fill="rgba(255,255,255,0.5)" font-size="30" font-weight="600" letter-spacing="1">whatsapp-mcp-plus</text>
-  <text x="1000" y="1830" fill="rgba(255,255,255,0.5)" font-size="30" font-weight="700" text-anchor="end">05</text>
+  
+    
+    <rect x="80" y="260" width="275" height="56" rx="28" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.14)"/>
+    <circle cx="110" cy="288" r="7" fill="#25D366"/>
+    <text x="132" y="298" fill="rgba(255,255,255,0.72)" font-size="26" font-weight="700" letter-spacing="4">REPLY SPEED</text>
+    <text x="76" y="470" fill="#F7FAF9" font-size="112" font-weight="900" letter-spacing="-3">Left on read?</text>
+    
+    <rect x="80" y="600" width="920" height="470" rx="40" fill="rgba(255,255,255,0.045)" stroke="rgba(255,255,255,0.09)"/>
+    <rect x="104" y="602" width="872" height="2" rx="1" fill="rgba(255,255,255,0.18)"/>
+    <text x="128" y="690" fill="#7CF3B0" font-size="42" font-weight="800">⚡ You reply fastest to</text>
+    <text x="128" y="800" fill="#F7FAF9" font-size="50" font-weight="800">1. Mom</text>
+      <text x="952" y="800" fill="#7CF3B0" font-size="50" font-weight="900" text-anchor="end">40s</text><text x="128" y="918" fill="#F7FAF9" font-size="50" font-weight="800">2. Aisha ❤️</text>
+      <text x="952" y="918" fill="#7CF3B0" font-size="50" font-weight="900" text-anchor="end">2m</text><text x="128" y="1036" fill="#F7FAF9" font-size="50" font-weight="800">3. Rohan</text>
+      <text x="952" y="1036" fill="#7CF3B0" font-size="50" font-weight="900" text-anchor="end">4m</text>
+    
+    <rect x="80" y="1140" width="920" height="470" rx="40" fill="rgba(255,255,255,0.045)" stroke="rgba(255,255,255,0.09)"/>
+    <rect x="104" y="1142" width="872" height="2" rx="1" fill="rgba(255,255,255,0.18)"/>
+    <text x="128" y="1230" fill="#FFCE73" font-size="42" font-weight="800">🐌 You leave on read longest</text>
+    <text x="128" y="1340" fill="#F7FAF9" font-size="50" font-weight="800">1. Landlord</text>
+      <text x="952" y="1340" fill="#FFCE73" font-size="50" font-weight="900" text-anchor="end">30m</text><text x="128" y="1458" fill="#F7FAF9" font-size="50" font-weight="800">2. Study Group</text>
+      <text x="952" y="1458" fill="#FFCE73" font-size="50" font-weight="900" text-anchor="end">12m</text><text x="128" y="1576" fill="#F7FAF9" font-size="50" font-weight="800">3. Rohan</text>
+      <text x="952" y="1576" fill="#FFCE73" font-size="50" font-weight="900" text-anchor="end">4m</text>
+  <rect width="1080" height="1920" filter="url(#grain-c5)" opacity="0.04"/>
+  <text x="80" y="1836" fill="rgba(255,255,255,0.46)" font-size="28" font-weight="600" letter-spacing="1">whatsapp-mcp-plus</text>
+  <text x="1000" y="1836" fill="rgba(255,255,255,0.46)" font-size="28" font-weight="700" text-anchor="end">05 / 06</text>
 </svg>

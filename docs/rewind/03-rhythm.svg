@@ -1,21 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920" font-family="'SF Pro Display','Segoe UI Variable Display','Segoe UI',system-ui,sans-serif">
   <defs>
-    <linearGradient id="g3" x1="0" y1="0" x2="0.030" y2="0.671">
-      <stop offset="0" stop-color="#0d2b26"/>
-      <stop offset="1" stop-color="#0f766e"/>
+    <linearGradient id="bg-c3" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" stop-color="#04140f"/><stop offset="1" stop-color="#0b3b34"/>
     </linearGradient>
+    <radialGradient id="orb-c3-0"><stop offset="0" stop-color="#10b981" stop-opacity="0.9"/><stop offset="1" stop-color="#10b981" stop-opacity="0"/></radialGradient><radialGradient id="orb-c3-1"><stop offset="0" stop-color="#0f766e" stop-opacity="0.9"/><stop offset="1" stop-color="#0f766e" stop-opacity="0"/></radialGradient>
+    <filter id="soft-c3" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="120"/></filter>
+    <filter id="glow-c3" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="18"/></filter>
+    <filter id="grain-c3"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.5 0"/></filter>
   </defs>
-  <rect width="1080" height="1920" fill="url(#g3)"/>
+  <rect width="1080" height="1920" fill="url(#bg-c3)"/>
+  <circle cx="160" cy="420" r="380" fill="url(#orb-c3-0)" opacity="0.4" filter="url(#soft-c3)"/><circle cx="980" cy="1450" r="360" fill="url(#orb-c3-1)" opacity="0.4" filter="url(#soft-c3)"/>
   
-    <text x="80" y="300" fill="rgba(255,255,255,0.74)" font-size="34" font-weight="800" letter-spacing="6">YOUR RHYTHM</text>
-    <text x="80" y="470" fill="#F6F8F9" font-size="120" font-weight="900" letter-spacing="-2">Peak hour</text>
-    <text x="72" y="700" fill="#7CF3B0" font-size="150" font-weight="900" letter-spacing="-3">6PM</text>
-    <text x="80" y="770" fill="rgba(255,255,255,0.74)" font-size="42" font-weight="600">busiest day: Fri</text>
-    <rect x="80.0" y="1041" width="30.7" height="459" rx="8" fill="rgba(37,211,102,0.45)"/><rect x="118.7" y="1431" width="30.7" height="69" rx="8" fill="rgba(37,211,102,0.45)"/><rect x="157.3" y="995" width="30.7" height="505" rx="8" fill="rgba(37,211,102,0.45)"/><rect x="196.0" y="1485" width="30.7" height="15" rx="8" fill="rgba(37,211,102,0.45)"/><rect x="234.7" y="995" width="30.7" height="505" rx="8" fill="rgba(37,211,102,0.45)"/><rect x="273.3" y="1485" width="30.7" height="15" rx="8" fill="rgba(37,211,102,0.45)"/><rect x="312.0" y="1053" width="30.7" height="447" rx="8" fill="rgba(37,211,102,0.45)"/><rect x="350.7" y="1431" width="30.7" height="69" rx="8" fill="rgba(37,211,102,0.45)"/><rect x="389.3" y="1056" width="30.7" height="444" rx="8" fill="rgba(37,211,102,0.45)"/><rect x="428.0" y="1439" width="30.7" height="61" rx="8" fill="rgba(37,211,102,0.45)"/><rect x="466.7" y="1007" width="30.7" height="493" rx="8" fill="rgba(37,211,102,0.45)"/><rect x="505.3" y="1489" width="30.7" height="11" rx="8" fill="rgba(37,211,102,0.45)"/><rect x="544.0" y="1007" width="30.7" height="493" rx="8" fill="rgba(37,211,102,0.45)"/><rect x="582.7" y="1489" width="30.7" height="11" rx="8" fill="rgba(37,211,102,0.45)"/><rect x="621.3" y="1034" width="30.7" height="466" rx="8" fill="rgba(37,211,102,0.45)"/><rect x="660.0" y="1435" width="30.7" height="65" rx="8" fill="rgba(37,211,102,0.45)"/><rect x="698.7" y="1034" width="30.7" height="466" rx="8" fill="rgba(37,211,102,0.45)"/><rect x="737.3" y="1431" width="30.7" height="69" rx="8" fill="rgba(37,211,102,0.45)"/><rect x="776.0" y="980" width="30.7" height="520" rx="8" fill="#25D366"/><rect x="814.7" y="1485" width="30.7" height="15" rx="8" fill="rgba(37,211,102,0.45)"/><rect x="853.3" y="980" width="30.7" height="520" rx="8" fill="rgba(37,211,102,0.45)"/><rect x="892.0" y="1485" width="30.7" height="15" rx="8" fill="rgba(37,211,102,0.45)"/><rect x="930.7" y="1041" width="30.7" height="459" rx="8" fill="rgba(37,211,102,0.45)"/><rect x="969.3" y="1431" width="30.7" height="69" rx="8" fill="rgba(37,211,102,0.45)"/>
-    <line x1="80" y1="1500" x2="1000" y2="1500" stroke="rgba(255,255,255,0.25)" stroke-width="2"/>
-    <text x="95.3" y="1546" fill="rgba(255,255,255,0.5)" font-size="30" font-weight="600" text-anchor="middle">12AM</text><text x="327.3" y="1546" fill="rgba(255,255,255,0.5)" font-size="30" font-weight="600" text-anchor="middle">6AM</text><text x="559.3" y="1546" fill="rgba(255,255,255,0.5)" font-size="30" font-weight="600" text-anchor="middle">12PM</text><text x="791.3" y="1546" fill="rgba(255,255,255,0.5)" font-size="30" font-weight="600" text-anchor="middle">6PM</text>
-    <text x="80" y="1620" fill="rgba(255,255,255,0.5)" font-size="34" font-weight="600">messages by hour of day</text>
-  <text x="80" y="1830" fill="rgba(255,255,255,0.5)" font-size="30" font-weight="600" letter-spacing="1">whatsapp-mcp-plus</text>
-  <text x="1000" y="1830" fill="rgba(255,255,255,0.5)" font-size="30" font-weight="700" text-anchor="end">03</text>
+  
+    
+    <rect x="80" y="260" width="275" height="56" rx="28" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.14)"/>
+    <circle cx="110" cy="288" r="7" fill="#25D366"/>
+    <text x="132" y="298" fill="rgba(255,255,255,0.72)" font-size="26" font-weight="700" letter-spacing="4">YOUR RHYTHM</text>
+    <text x="76" y="470" fill="#F7FAF9" font-size="122" font-weight="900" letter-spacing="-3">Peak hour</text>
+    
+    <text x="72" y="720" fill="#7CF3B0" font-size="168" font-weight="900" letter-spacing="-4" filter="url(#glow-c3)" opacity="0.7">6PM</text>
+    <text x="72" y="720" fill="#F7FAF9" font-size="168" font-weight="900" letter-spacing="-4">6PM</text>
+    <text x="80" y="800" fill="rgba(255,255,255,0.72)" font-size="42" font-weight="600">busiest day · Fri</text>
+    
+    <rect x="80" y="980" width="920" height="640" rx="40" fill="rgba(255,255,255,0.045)" stroke="rgba(255,255,255,0.09)"/>
+    <rect x="104" y="982" width="872" height="2" rx="1" fill="rgba(255,255,255,0.18)"/>
+    <rect x="128.0" y="1074" width="26.7" height="406" rx="7" fill="rgba(37,211,102,0.4)"/><rect x="162.7" y="1419" width="26.7" height="61" rx="7" fill="rgba(37,211,102,0.4)"/><rect x="197.3" y="1034" width="26.7" height="446" rx="7" fill="rgba(37,211,102,0.4)"/><rect x="232.0" y="1466" width="26.7" height="14" rx="7" fill="rgba(37,211,102,0.4)"/><rect x="266.7" y="1034" width="26.7" height="446" rx="7" fill="rgba(37,211,102,0.4)"/><rect x="301.3" y="1466" width="26.7" height="14" rx="7" fill="rgba(37,211,102,0.4)"/><rect x="336.0" y="1084" width="26.7" height="396" rx="7" fill="rgba(37,211,102,0.4)"/><rect x="370.7" y="1419" width="26.7" height="61" rx="7" fill="rgba(37,211,102,0.4)"/><rect x="405.3" y="1088" width="26.7" height="392" rx="7" fill="rgba(37,211,102,0.4)"/><rect x="440.0" y="1426" width="26.7" height="54" rx="7" fill="rgba(37,211,102,0.4)"/><rect x="474.7" y="1044" width="26.7" height="436" rx="7" fill="rgba(37,211,102,0.4)"/><rect x="509.3" y="1470" width="26.7" height="10" rx="7" fill="rgba(37,211,102,0.4)"/><rect x="544.0" y="1044" width="26.7" height="436" rx="7" fill="rgba(37,211,102,0.4)"/><rect x="578.7" y="1470" width="26.7" height="10" rx="7" fill="rgba(37,211,102,0.4)"/><rect x="613.3" y="1067" width="26.7" height="413" rx="7" fill="rgba(37,211,102,0.4)"/><rect x="648.0" y="1422" width="26.7" height="58" rx="7" fill="rgba(37,211,102,0.4)"/><rect x="682.7" y="1067" width="26.7" height="413" rx="7" fill="rgba(37,211,102,0.4)"/><rect x="717.3" y="1419" width="26.7" height="61" rx="7" fill="rgba(37,211,102,0.4)"/><rect x="752.0" y="1020" width="26.7" height="460" rx="7" fill="#25D366"/><rect x="786.7" y="1466" width="26.7" height="14" rx="7" fill="rgba(37,211,102,0.4)"/><rect x="821.3" y="1020" width="26.7" height="460" rx="7" fill="rgba(37,211,102,0.4)"/><rect x="856.0" y="1466" width="26.7" height="14" rx="7" fill="rgba(37,211,102,0.4)"/><rect x="890.7" y="1074" width="26.7" height="406" rx="7" fill="rgba(37,211,102,0.4)"/><rect x="925.3" y="1419" width="26.7" height="61" rx="7" fill="rgba(37,211,102,0.4)"/>
+    <line x1="128" y1="1480" x2="952" y2="1480" stroke="rgba(255,255,255,0.22)" stroke-width="2"/>
+    <text x="141.3" y="1526" fill="rgba(255,255,255,0.46)" font-size="28" font-weight="600" text-anchor="middle">12AM</text><text x="349.3" y="1526" fill="rgba(255,255,255,0.46)" font-size="28" font-weight="600" text-anchor="middle">6AM</text><text x="557.3" y="1526" fill="rgba(255,255,255,0.46)" font-size="28" font-weight="600" text-anchor="middle">12PM</text><text x="765.3" y="1526" fill="rgba(255,255,255,0.46)" font-size="28" font-weight="600" text-anchor="middle">6PM</text>
+    <text x="128" y="1060" fill="rgba(255,255,255,0.46)" font-size="30" font-weight="700" letter-spacing="2">MESSAGES BY HOUR OF DAY</text>
+  <rect width="1080" height="1920" filter="url(#grain-c3)" opacity="0.04"/>
+  <text x="80" y="1836" fill="rgba(255,255,255,0.46)" font-size="28" font-weight="600" letter-spacing="1">whatsapp-mcp-plus</text>
+  <text x="1000" y="1836" fill="rgba(255,255,255,0.46)" font-size="28" font-weight="700" text-anchor="end">03 / 06</text>
 </svg>

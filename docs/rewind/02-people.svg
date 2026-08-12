@@ -1,37 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920" font-family="'SF Pro Display','Segoe UI Variable Display','Segoe UI',system-ui,sans-serif">
   <defs>
-    <linearGradient id="g2" x1="0" y1="0" x2="0.017" y2="0.629">
-      <stop offset="0" stop-color="#0b141a"/>
-      <stop offset="1" stop-color="#1f4d3f"/>
+    <linearGradient id="bg-c2" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" stop-color="#04120e"/><stop offset="1" stop-color="#0a231c"/>
     </linearGradient>
+    <radialGradient id="orb-c2-0"><stop offset="0" stop-color="#25D366" stop-opacity="0.9"/><stop offset="1" stop-color="#25D366" stop-opacity="0"/></radialGradient>
+    <filter id="soft-c2" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="120"/></filter>
+    <filter id="glow-c2" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="18"/></filter>
+    <filter id="grain-c2"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.5 0"/></filter>
   </defs>
-  <rect width="1080" height="1920" fill="url(#g2)"/>
+  <rect width="1080" height="1920" fill="url(#bg-c2)"/>
+  <circle cx="980" cy="520" r="360" fill="url(#orb-c2-0)" opacity="0.4" filter="url(#soft-c2)"/>
+  <text x="620" y="1180" fill="rgba(255,255,255,0.045)" font-size="900" font-weight="900" letter-spacing="-6">5</text>
   
-    <text x="80" y="300" fill="rgba(255,255,255,0.74)" font-size="34" font-weight="800" letter-spacing="6">YOUR PEOPLE</text>
-    <text x="80" y="470" fill="#F6F8F9" font-size="120" font-weight="900" letter-spacing="-2">Top 5 chats</text>
-    <text x="80" y="560" fill="rgba(255,255,255,0.74)" font-size="42" font-weight="600">who filled your inbox this year</text>
     
-      <text x="80" y="760" fill="#F6F8F9" font-size="52" font-weight="800">1. Mom</text>
-      <text x="1000" y="760" fill="rgba(255,255,255,0.74)" font-size="46" font-weight="700" text-anchor="end">512</text>
-      <rect x="80" y="786" width="920" height="26" rx="13" fill="rgba(255,255,255,0.12)"/>
-      <rect x="80" y="786" width="920" height="26" rx="13" fill="#25D366"/>
-      <text x="80" y="950" fill="#F6F8F9" font-size="52" font-weight="800">2. Aisha ❤️</text>
-      <text x="1000" y="950" fill="rgba(255,255,255,0.74)" font-size="46" font-weight="700" text-anchor="end">468</text>
-      <rect x="80" y="976" width="920" height="26" rx="13" fill="rgba(255,255,255,0.12)"/>
-      <rect x="80" y="976" width="841" height="26" rx="13" fill="#25D366"/>
-      <text x="80" y="1140" fill="#F6F8F9" font-size="52" font-weight="800">3. Study Group</text>
-      <text x="1000" y="1140" fill="rgba(255,255,255,0.74)" font-size="46" font-weight="700" text-anchor="end">330</text>
-      <rect x="80" y="1166" width="920" height="26" rx="13" fill="rgba(255,255,255,0.12)"/>
-      <rect x="80" y="1166" width="593" height="26" rx="13" fill="#25D366"/>
-      <text x="80" y="1330" fill="#F6F8F9" font-size="52" font-weight="800">4. Rohan</text>
-      <text x="1000" y="1330" fill="rgba(255,255,255,0.74)" font-size="46" font-weight="700" text-anchor="end">240</text>
-      <rect x="80" y="1356" width="920" height="26" rx="13" fill="rgba(255,255,255,0.12)"/>
-      <rect x="80" y="1356" width="431" height="26" rx="13" fill="#25D366"/>
-      <text x="80" y="1520" fill="#F6F8F9" font-size="52" font-weight="800">5. Landlord</text>
-      <text x="1000" y="1520" fill="rgba(255,255,255,0.74)" font-size="46" font-weight="700" text-anchor="end">88</text>
-      <rect x="80" y="1546" width="920" height="26" rx="13" fill="rgba(255,255,255,0.12)"/>
-      <rect x="80" y="1546" width="158" height="26" rx="13" fill="#25D366"/>
-  <text x="80" y="1830" fill="rgba(255,255,255,0.5)" font-size="30" font-weight="600" letter-spacing="1">whatsapp-mcp-plus</text>
-  <text x="1000" y="1830" fill="rgba(255,255,255,0.5)" font-size="30" font-weight="700" text-anchor="end">02</text>
+    <rect x="80" y="260" width="275" height="56" rx="28" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.14)"/>
+    <circle cx="110" cy="288" r="7" fill="#25D366"/>
+    <text x="132" y="298" fill="rgba(255,255,255,0.72)" font-size="26" font-weight="700" letter-spacing="4">YOUR PEOPLE</text>
+    <text x="76" y="470" fill="#F7FAF9" font-size="122" font-weight="900" letter-spacing="-3">Top 5 chats</text>
+    <text x="80" y="560" fill="rgba(255,255,255,0.72)" font-size="40" font-weight="600">who filled your inbox this year</text>
+    
+    <rect x="80" y="720" width="920" height="920" rx="40" fill="rgba(255,255,255,0.045)" stroke="rgba(255,255,255,0.09)"/>
+    <rect x="104" y="722" width="872" height="2" rx="1" fill="rgba(255,255,255,0.18)"/>
+    
+      <text x="128" y="820" fill="#F7FAF9" font-size="50" font-weight="800">1. Mom</text>
+      <text x="952" y="820" fill="rgba(255,255,255,0.72)" font-size="44" font-weight="700" text-anchor="end">512</text>
+      <rect x="128" y="846" width="824" height="22" rx="11" fill="rgba(255,255,255,0.10)"/>
+      <rect x="128" y="846" width="824" height="22" rx="11" fill="#25D366"/>
+      <text x="128" y="996" fill="#F7FAF9" font-size="50" font-weight="800">2. Aisha ❤️</text>
+      <text x="952" y="996" fill="rgba(255,255,255,0.72)" font-size="44" font-weight="700" text-anchor="end">468</text>
+      <rect x="128" y="1022" width="824" height="22" rx="11" fill="rgba(255,255,255,0.10)"/>
+      <rect x="128" y="1022" width="753" height="22" rx="11" fill="#25D366"/>
+      <text x="128" y="1172" fill="#F7FAF9" font-size="50" font-weight="800">3. Study Group</text>
+      <text x="952" y="1172" fill="rgba(255,255,255,0.72)" font-size="44" font-weight="700" text-anchor="end">330</text>
+      <rect x="128" y="1198" width="824" height="22" rx="11" fill="rgba(255,255,255,0.10)"/>
+      <rect x="128" y="1198" width="531" height="22" rx="11" fill="#25D366"/>
+      <text x="128" y="1348" fill="#F7FAF9" font-size="50" font-weight="800">4. Rohan</text>
+      <text x="952" y="1348" fill="rgba(255,255,255,0.72)" font-size="44" font-weight="700" text-anchor="end">240</text>
+      <rect x="128" y="1374" width="824" height="22" rx="11" fill="rgba(255,255,255,0.10)"/>
+      <rect x="128" y="1374" width="386" height="22" rx="11" fill="#25D366"/>
+      <text x="128" y="1524" fill="#F7FAF9" font-size="50" font-weight="800">5. Landlord</text>
+      <text x="952" y="1524" fill="rgba(255,255,255,0.72)" font-size="44" font-weight="700" text-anchor="end">88</text>
+      <rect x="128" y="1550" width="824" height="22" rx="11" fill="rgba(255,255,255,0.10)"/>
+      <rect x="128" y="1550" width="142" height="22" rx="11" fill="#25D366"/>
+  <rect width="1080" height="1920" filter="url(#grain-c2)" opacity="0.04"/>
+  <text x="80" y="1836" fill="rgba(255,255,255,0.46)" font-size="28" font-weight="600" letter-spacing="1">whatsapp-mcp-plus</text>
+  <text x="1000" y="1836" fill="rgba(255,255,255,0.46)" font-size="28" font-weight="700" text-anchor="end">02 / 06</text>
 </svg>

@@ -1,33 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920" font-family="'SF Pro Display','Segoe UI Variable Display','Segoe UI',system-ui,sans-serif">
   <defs>
-    <linearGradient id="g6" x1="0" y1="0" x2="0.030" y2="0.671">
-      <stop offset="0" stop-color="#052e2b"/>
-      <stop offset="1" stop-color="#0a7d68"/>
+    <linearGradient id="bg-c6" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" stop-color="#03140e"/><stop offset="1" stop-color="#08312a"/>
     </linearGradient>
+    <radialGradient id="orb-c6-0"><stop offset="0" stop-color="#25D366" stop-opacity="0.9"/><stop offset="1" stop-color="#25D366" stop-opacity="0"/></radialGradient>
+    <filter id="soft-c6" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="120"/></filter>
+    <filter id="glow-c6" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="18"/></filter>
+    <filter id="grain-c6"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.5 0"/></filter>
   </defs>
-  <rect width="1080" height="1920" fill="url(#g6)"/>
+  <rect width="1080" height="1920" fill="url(#bg-c6)"/>
+  <circle cx="900" cy="1500" r="420" fill="url(#orb-c6-0)" opacity="0.42" filter="url(#soft-c6)"/>
   
-    <text x="80" y="300" fill="rgba(255,255,255,0.74)" font-size="34" font-weight="800" letter-spacing="6">BY THE NUMBERS</text>
-    <text x="80" y="470" fill="#F6F8F9" font-size="120" font-weight="900" letter-spacing="-2">Your year</text>
+  
     
-    <text x="80" y="760" fill="#F6F8F9" font-size="120" font-weight="900" letter-spacing="-2">3,276</text>
-    <text x="84" y="820" fill="rgba(255,255,255,0.74)" font-size="38" font-weight="700" letter-spacing="1">WORDS SENT</text>
+    <rect x="80" y="260" width="338" height="56" rx="28" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.14)"/>
+    <circle cx="110" cy="288" r="7" fill="#25D366"/>
+    <text x="132" y="298" fill="rgba(255,255,255,0.72)" font-size="26" font-weight="700" letter-spacing="4">BY THE NUMBERS</text>
+    <text x="76" y="470" fill="#F7FAF9" font-size="122" font-weight="900" letter-spacing="-3">Your year</text>
     
-    <text x="600" y="760" fill="#F6F8F9" font-size="120" font-weight="900" letter-spacing="-2">22d</text>
-    <text x="604" y="820" fill="rgba(255,255,255,0.74)" font-size="38" font-weight="700" letter-spacing="1">LONGEST STREAK</text>
-    
-    <text x="80" y="1080" fill="#F6F8F9" font-size="120" font-weight="900" letter-spacing="-2">819</text>
-    <text x="84" y="1140" fill="rgba(255,255,255,0.74)" font-size="38" font-weight="700" letter-spacing="1">SENT</text>
-    
-    <text x="600" y="1080" fill="#F6F8F9" font-size="120" font-weight="900" letter-spacing="-2">819</text>
-    <text x="604" y="1140" fill="rgba(255,255,255,0.74)" font-size="38" font-weight="700" letter-spacing="1">RECEIVED</text>
-    
-    <text x="80" y="1400" fill="#F6F8F9" font-size="120" font-weight="900" letter-spacing="-2">5</text>
-    <text x="84" y="1460" fill="rgba(255,255,255,0.74)" font-size="38" font-weight="700" letter-spacing="1">ACTIVE CHATS</text>
-    
-    <text x="600" y="1400" fill="#F6F8F9" font-size="120" font-weight="900" letter-spacing="-2">1,638</text>
-    <text x="604" y="1460" fill="rgba(255,255,255,0.74)" font-size="38" font-weight="700" letter-spacing="1">TOTAL MESSAGES</text>
-  <text x="80" y="1830" fill="rgba(255,255,255,0.5)" font-size="30" font-weight="600" letter-spacing="1">whatsapp-mcp-plus</text>
-  <text x="1000" y="1830" fill="rgba(255,255,255,0.5)" font-size="30" font-weight="700" text-anchor="end">06</text>
+    <rect x="80" y="720" width="440" height="300" rx="40" fill="rgba(255,255,255,0.045)" stroke="rgba(255,255,255,0.09)"/>
+    <rect x="104" y="722" width="392" height="2" rx="1" fill="rgba(255,255,255,0.18)"/>
+      <text x="124" y="890" fill="#F7FAF9" font-size="104" font-weight="900" letter-spacing="-2">3,276</text>
+      <text x="128" y="948" fill="rgba(255,255,255,0.72)" font-size="34" font-weight="700" letter-spacing="1">WORDS SENT</text>
+    <rect x="560" y="720" width="440" height="300" rx="40" fill="rgba(255,255,255,0.045)" stroke="rgba(255,255,255,0.09)"/>
+    <rect x="584" y="722" width="392" height="2" rx="1" fill="rgba(255,255,255,0.18)"/>
+      <text x="604" y="890" fill="#F7FAF9" font-size="104" font-weight="900" letter-spacing="-2">22d</text>
+      <text x="608" y="948" fill="rgba(255,255,255,0.72)" font-size="34" font-weight="700" letter-spacing="1">LONGEST STREAK</text>
+    <rect x="80" y="1060" width="440" height="300" rx="40" fill="rgba(255,255,255,0.045)" stroke="rgba(255,255,255,0.09)"/>
+    <rect x="104" y="1062" width="392" height="2" rx="1" fill="rgba(255,255,255,0.18)"/>
+      <text x="124" y="1230" fill="#F7FAF9" font-size="104" font-weight="900" letter-spacing="-2">819</text>
+      <text x="128" y="1288" fill="rgba(255,255,255,0.72)" font-size="34" font-weight="700" letter-spacing="1">SENT</text>
+    <rect x="560" y="1060" width="440" height="300" rx="40" fill="rgba(255,255,255,0.045)" stroke="rgba(255,255,255,0.09)"/>
+    <rect x="584" y="1062" width="392" height="2" rx="1" fill="rgba(255,255,255,0.18)"/>
+      <text x="604" y="1230" fill="#F7FAF9" font-size="104" font-weight="900" letter-spacing="-2">819</text>
+      <text x="608" y="1288" fill="rgba(255,255,255,0.72)" font-size="34" font-weight="700" letter-spacing="1">RECEIVED</text>
+    <rect x="80" y="1400" width="440" height="300" rx="40" fill="rgba(255,255,255,0.045)" stroke="rgba(255,255,255,0.09)"/>
+    <rect x="104" y="1402" width="392" height="2" rx="1" fill="rgba(255,255,255,0.18)"/>
+      <text x="124" y="1570" fill="#F7FAF9" font-size="104" font-weight="900" letter-spacing="-2">5</text>
+      <text x="128" y="1628" fill="rgba(255,255,255,0.72)" font-size="34" font-weight="700" letter-spacing="1">ACTIVE CHATS</text>
+    <rect x="560" y="1400" width="440" height="300" rx="40" fill="rgba(255,255,255,0.045)" stroke="rgba(255,255,255,0.09)"/>
+    <rect x="584" y="1402" width="392" height="2" rx="1" fill="rgba(255,255,255,0.18)"/>
+      <text x="604" y="1570" fill="#F7FAF9" font-size="104" font-weight="900" letter-spacing="-2">1,638</text>
+      <text x="608" y="1628" fill="rgba(255,255,255,0.72)" font-size="34" font-weight="700" letter-spacing="1">TOTAL MESSAGES</text>
+  <rect width="1080" height="1920" filter="url(#grain-c6)" opacity="0.04"/>
+  <text x="80" y="1836" fill="rgba(255,255,255,0.46)" font-size="28" font-weight="600" letter-spacing="1">whatsapp-mcp-plus</text>
+  <text x="1000" y="1836" fill="rgba(255,255,255,0.46)" font-size="28" font-weight="700" text-anchor="end">06 / 06</text>
 </svg>

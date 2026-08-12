@@ -1,30 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920" font-family="'SF Pro Display','Segoe UI Variable Display','Segoe UI',system-ui,sans-serif">
   <defs>
-    <linearGradient id="g4" x1="0" y1="0" x2="0.047" y2="0.711">
-      <stop offset="0" stop-color="#241047"/>
-      <stop offset="1" stop-color="#6d28d9"/>
+    <linearGradient id="bg-c4" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" stop-color="#0b0620"/><stop offset="1" stop-color="#2a1152"/>
     </linearGradient>
+    <radialGradient id="orb-c4-0"><stop offset="0" stop-color="#7c3aed" stop-opacity="0.9"/><stop offset="1" stop-color="#7c3aed" stop-opacity="0"/></radialGradient><radialGradient id="orb-c4-1"><stop offset="0" stop-color="#db2777" stop-opacity="0.9"/><stop offset="1" stop-color="#db2777" stop-opacity="0"/></radialGradient>
+    <filter id="soft-c4" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="120"/></filter>
+    <filter id="glow-c4" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="18"/></filter>
+    <filter id="grain-c4"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.5 0"/></filter>
   </defs>
-  <rect width="1080" height="1920" fill="url(#g4)"/>
+  <rect width="1080" height="1920" fill="url(#bg-c4)"/>
+  <circle cx="860" cy="380" r="420" fill="url(#orb-c4-0)" opacity="0.5" filter="url(#soft-c4)"/><circle cx="180" cy="1520" r="420" fill="url(#orb-c4-1)" opacity="0.42" filter="url(#soft-c4)"/>
   
-    <text x="80" y="300" fill="rgba(255,255,255,0.74)" font-size="34" font-weight="800" letter-spacing="6">YOUR MOOD</text>
-    <text x="80" y="470" fill="#F6F8F9" font-size="120" font-weight="900" letter-spacing="-2">Top emojis</text>
-    <text x="540" y="800" font-size="240" text-anchor="middle">🥹</text>
-    <text x="540" y="700" fill="rgba(255,255,255,0.74)" font-size="40" font-weight="700" text-anchor="middle" letter-spacing="2">MOST USED · 184×</text>
+  
     
-      <text x="150" y="1050" font-size="130" text-anchor="middle">🥹</text>
-      <text x="150" y="1130" fill="rgba(255,255,255,0.74)" font-size="44" font-weight="800" text-anchor="middle">184</text>
-      <text x="650" y="1050" font-size="130" text-anchor="middle">❤️</text>
-      <text x="650" y="1130" fill="rgba(255,255,255,0.74)" font-size="44" font-weight="800" text-anchor="middle">184</text>
-      <text x="150" y="1310" font-size="130" text-anchor="middle">😂</text>
-      <text x="150" y="1390" fill="rgba(255,255,255,0.74)" font-size="44" font-weight="800" text-anchor="middle">184</text>
-      <text x="650" y="1310" font-size="130" text-anchor="middle">🔥</text>
-      <text x="650" y="1390" fill="rgba(255,255,255,0.74)" font-size="44" font-weight="800" text-anchor="middle">184</text>
-      <text x="150" y="1570" font-size="130" text-anchor="middle">✨</text>
-      <text x="150" y="1650" fill="rgba(255,255,255,0.74)" font-size="44" font-weight="800" text-anchor="middle">182</text>
-      <text x="650" y="1570" font-size="130" text-anchor="middle">🙏</text>
-      <text x="650" y="1650" fill="rgba(255,255,255,0.74)" font-size="44" font-weight="800" text-anchor="middle">180</text>
-  <text x="80" y="1830" fill="rgba(255,255,255,0.5)" font-size="30" font-weight="600" letter-spacing="1">whatsapp-mcp-plus</text>
-  <text x="1000" y="1830" fill="rgba(255,255,255,0.5)" font-size="30" font-weight="700" text-anchor="end">04</text>
+    <rect x="80" y="260" width="233" height="56" rx="28" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.14)"/>
+    <circle cx="110" cy="288" r="7" fill="#c084fc"/>
+    <text x="132" y="298" fill="rgba(255,255,255,0.72)" font-size="26" font-weight="700" letter-spacing="4">YOUR MOOD</text>
+    <text x="76" y="470" fill="#F7FAF9" font-size="122" font-weight="900" letter-spacing="-3">Top emojis</text>
+    <text x="540" y="640" fill="rgba(255,255,255,0.72)" font-size="34" font-weight="800" text-anchor="middle" letter-spacing="4">MOST USED · 184×</text>
+    <text x="540" y="880" font-size="240" text-anchor="middle">🥹</text>
+    
+    <rect x="80" y="1010" width="920" height="620" rx="40" fill="rgba(255,255,255,0.045)" stroke="rgba(255,255,255,0.09)"/>
+    <rect x="104" y="1012" width="872" height="2" rx="1" fill="rgba(255,255,255,0.18)"/>
+    
+      <text x="300" y="1180" font-size="120" text-anchor="middle">❤️</text>
+      <text x="300" y="1252" fill="rgba(255,255,255,0.72)" font-size="42" font-weight="800" text-anchor="middle">184×</text>
+      <text x="780" y="1180" font-size="120" text-anchor="middle">😂</text>
+      <text x="780" y="1252" fill="rgba(255,255,255,0.72)" font-size="42" font-weight="800" text-anchor="middle">184×</text>
+      <text x="300" y="1430" font-size="120" text-anchor="middle">🔥</text>
+      <text x="300" y="1502" fill="rgba(255,255,255,0.72)" font-size="42" font-weight="800" text-anchor="middle">184×</text>
+      <text x="780" y="1430" font-size="120" text-anchor="middle">✨</text>
+      <text x="780" y="1502" fill="rgba(255,255,255,0.72)" font-size="42" font-weight="800" text-anchor="middle">182×</text>
+  <rect width="1080" height="1920" filter="url(#grain-c4)" opacity="0.04"/>
+  <text x="80" y="1836" fill="rgba(255,255,255,0.46)" font-size="28" font-weight="600" letter-spacing="1">whatsapp-mcp-plus</text>
+  <text x="1000" y="1836" fill="rgba(255,255,255,0.46)" font-size="28" font-weight="700" text-anchor="end">04 / 06</text>
 </svg>
