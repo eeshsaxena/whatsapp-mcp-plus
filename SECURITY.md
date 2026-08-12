@@ -1,0 +1,41 @@
+# Security
+
+whatsapp-mcp-plus connects a personal WhatsApp account to an AI agent. That is a
+powerful and sensitive capability, so security is a first-class concern.
+
+## Threat model & mitigations
+
+**Prompt injection / the "lethal trifecta".** WhatsApp message content is
+untrusted data that flows into an LLM's context. A crafted message could try to
+make the agent exfiltrate your data or send messages on your behalf. Mitigations:
+- **Read-only by default.** No send/mutating tool works until you opt into
+  `assisted` mode.
+- **Confirm-to-send.** In safe modes a send is staged and returns a token; nothing
+  goes out until `confirm_action` is called, so a single injected instruction
+  cannot fire a message.
+- **Injection guard.** Incoming messages that look like instructions to an AI are
+  flagged, and message lists returned to the model carry a warning banner telling
+  it to treat content as data, not commands.
+- **Allowlist.** Sends are restricted to known contacts by default.
+
+**Local data.** All messages are stored in a local SQLite DB and never leave your
+machine except through an explicit tool call by your agent. Pairing credentials
+live in `auth_info/` and are git-ignored. Do not commit `data/` or `auth_info/`.
+
+**Account safety.** This uses an unofficial WhatsApp client (Baileys); misuse can
+get your number banned. Rate limiting, allowlisting, and read-only defaults are
+designed to keep usage in the low-risk zone. See the README disclaimer.
+
+## Reporting a vulnerability
+
+Please report security issues privately via a GitHub Security Advisory on the
+repository (Security → Report a vulnerability), or open a minimal issue asking for
+a private contact channel. Do not disclose exploitable details in a public issue
+until a fix is available. I aim to acknowledge reports within a few days.
+
+## Not in scope
+
+- Bans resulting from usage against WhatsApp's Terms of Service (inherent to any
+  unofficial client; mitigated, not eliminated).
+- Vulnerabilities in upstream dependencies (report those upstream), though I will
+  bump/patch promptly once notified.
