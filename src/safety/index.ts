@@ -121,7 +121,15 @@ export function needsConfirm(): boolean {
   return config.requireConfirm && getMode() !== "unrestricted";
 }
 
+function prunePending(): void {
+  const now = Date.now();
+  for (const [tok, action] of pending) {
+    if (now - action.createdAt > PENDING_TTL_MS) pending.delete(tok);
+  }
+}
+
 export function stageAction(description: string, run: () => Promise<unknown>): string {
+  prunePending(); // drop expired staged actions so the map stays bounded
   const token = randomUUID().slice(0, 8);
   pending.set(token, { token, description, createdAt: Date.now(), run });
   return token;

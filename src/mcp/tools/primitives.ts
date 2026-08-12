@@ -31,7 +31,7 @@ export function registerPrimitiveTools(server: McpServer): void {
     "react_to_message",
     {
       message_id: z.string(),
-      emoji: z.string().min(1).describe("Emoji to react with; empty string removes the reaction"),
+      emoji: z.string().max(8).describe("Emoji to react with; empty string ('') removes the reaction"),
     },
     safeHandler(async ({ message_id, emoji }: any) => {
       assertMutationsAllowed("react_to_message");
@@ -62,13 +62,16 @@ export function registerPrimitiveTools(server: McpServer): void {
   server.tool(
     "delete_message",
     {
-      message_id: z.string(),
-      for_everyone: z.boolean().default(true).describe("Delete for everyone (only works for your own recent messages)"),
+      message_id: z.string().describe("Delete for everyone; only works for your own recent messages"),
     },
     safeHandler(async ({ message_id }: any) => {
       assertMutationsAllowed("delete_message");
-      const key = keyForMessage(message_id);
-      if (!key) return errorResult(`Unknown message id ${message_id}`);
+      const row = getMessageById(message_id);
+      if (!row) return errorResult(`Unknown message id ${message_id}`);
+      if (!row.is_from_me) {
+        return errorResult("delete_message removes a message for everyone, which only works for messages YOU sent.");
+      }
+      const key = reconstructKey({ id: row.id, chat_jid: row.chat_jid, is_from_me: true, sender: row.sender });
       await deleteMessage(getSock(), key);
       return textResult(`Requested deletion of ${message_id}`);
     }),

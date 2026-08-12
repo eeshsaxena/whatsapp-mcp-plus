@@ -535,8 +535,12 @@ export function listAllowlist(): string[] {
 /* --------------------------------------------------------- rate accounting */
 
 export function logSend(recipient: string): void {
-  getDb().prepare(`INSERT INTO sent_log (ts, recipient) VALUES (?, ?)`)
+  const db = getDb();
+  db.prepare(`INSERT INTO sent_log (ts, recipient) VALUES (?, ?)`)
     .run(new Date().toISOString(), recipient);
+  // Keep the rate-limit log bounded — only the last ~2 days matter.
+  const cutoff = new Date(Date.now() - 2 * 24 * 3600_000).toISOString();
+  db.prepare(`DELETE FROM sent_log WHERE ts < ?`).run(cutoff);
 }
 
 export function countSendsSince(sinceIso: string): number {
