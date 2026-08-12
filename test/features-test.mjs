@@ -10,6 +10,7 @@ process.env.WAMCP_DATA_DIR = tmp;
 process.env.WAMCP_AUTH_DIR = path.join(tmp, "auth");
 const db = await import("../dist/db.js");
 const { renderWrappedSVG } = await import("../dist/analytics/card.js");
+const { renderRewindCards } = await import("../dist/analytics/rewind.js");
 const { proto } = await import("baileys");
 
 let pass = 0;
@@ -72,6 +73,15 @@ check("card is valid svg root", svg.startsWith("<?xml") && svg.includes("<svg"))
 check("card renders total message count", svg.includes(String(wrapped.totalMessages)));
 check("card includes a contact name", svg.includes("Carol"));
 check("card is well-formed (balanced svg tag)", svg.includes("</svg>"));
+
+// --- wrapped distributions + rewind cards -------------------------------------
+check("wrapped exposes 24 hourly buckets", Array.isArray(wrapped.hourly) && wrapped.hourly.length === 24);
+check("wrapped exposes 7 daily buckets", Array.isArray(wrapped.daily) && wrapped.daily.length === 7);
+const board = db.computeResponseLeaderboard(1, 5);
+const cards = renderRewindCards(wrapped, board, { subtitle: "test" });
+check("rewind returns >= 5 story cards", cards.length >= 5);
+check("every rewind card is valid svg 1080x1920", cards.every((c) => c.svg.startsWith("<?xml") && c.svg.includes('width="1080"') && c.svg.includes("</svg>")));
+check("rewind cover shows total messages", cards[0].svg.includes(String(wrapped.totalMessages)));
 
 // --- raw proto persistence round-trip ----------------------------------------
 const rawMsg = proto.WebMessageInfo.create({

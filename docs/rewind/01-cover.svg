@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="0.067" y2="0.750">
+      <stop offset="0" stop-color="#075E54"/>
+      <stop offset="1" stop-color="#25D366"/>
+    </linearGradient>
+  </defs>
+  <rect width="1080" height="1920" fill="url(#g1)"/>
+  
+    <text x="80" y="300" fill="rgba(255,255,255,0.85)" font-size="34" font-weight="800" letter-spacing="6">WHATSAPP</text>
+    <text x="80" y="470" fill="#F6F8F9" font-size="150" font-weight="900" letter-spacing="-2">Rewind</text>
+    <text x="80" y="540" fill="rgba(255,255,255,0.9)" font-size="40" font-weight="600">2026 · sample data</text>
+
+    <text x="80" y="1120" fill="rgba(255,255,255,0.85)" font-size="40" font-weight="700" letter-spacing="2">YOU SENT &amp; RECEIVED</text>
+    <text x="72" y="1330" fill="#F6F8F9" font-size="230" font-weight="900" letter-spacing="-4">1,638</text>
+    <text x="80" y="1410" fill="rgba(255,255,255,0.9)" font-size="46" font-weight="600">messages across 5 chats</text>
+  <text x="80" y="1830" fill="rgba(255,255,255,0.5)" font-size="30" font-weight="600" letter-spacing="1">whatsapp-mcp-plus</text>
+  <text x="1000" y="1830" fill="rgba(255,255,255,0.5)" font-size="30" font-weight="700" text-anchor="end">01</text>
+</svg>

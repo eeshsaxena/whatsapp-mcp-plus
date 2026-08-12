@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+  <defs>
+    <linearGradient id="g3" x1="0" y1="0" x2="0.030" y2="0.671">
+      <stop offset="0" stop-color="#0d2b26"/>
+      <stop offset="1" stop-color="#0f766e"/>
+    </linearGradient>
+  </defs>
+  <rect width="1080" height="1920" fill="url(#g3)"/>
+  
+    <text x="80" y="300" fill="rgba(255,255,255,0.74)" font-size="34" font-weight="800" letter-spacing="6">YOUR RHYTHM</text>
+    <text x="80" y="470" fill="#F6F8F9" font-size="120" font-weight="900" letter-spacing="-2">Peak hour</text>
+    <text x="72" y="700" fill="#7CF3B0" font-size="150" font-weight="900" letter-spacing="-3">6PM</text>
+    <text x="80" y="770" fill="rgba(255,255,255,0.74)" font-size="42" font-weight="600">busiest day: Fri</text>
+    <rect x="80.0" y="1041" width="30.7" height="459" rx="8" fill="rgba(37,211,102,0.45)"/><rect x="118.7" y="1431" width="30.7" height="69" rx="8" fill="rgba(37,211,102,0.45)"/><rect x="157.3" y="995" width="30.7" height="505" rx="8" fill="rgba(37,211,102,0.45)"/><rect x="196.0" y="1485" width="30.7" height="15" rx="8" fill="rgba(37,211,102,0.45)"/><rect x="234.7" y="995" width="30.7" height="505" rx="8" fill="rgba(37,211,102,0.45)"/><rect x="273.3" y="1485" width="30.7" height="15" rx="8" fill="rgba(37,211,102,0.45)"/><rect x="312.0" y="1053" width="30.7" height="447" rx="8" fill="rgba(37,211,102,0.45)"/><rect x="350.7" y="1431" width="30.7" height="69" rx="8" fill="rgba(37,211,102,0.45)"/><rect x="389.3" y="1056" width="30.7" height="444" rx="8" fill="rgba(37,211,102,0.45)"/><rect x="428.0" y="1439" width="30.7" height="61" rx="8" fill="rgba(37,211,102,0.45)"/><rect x="466.7" y="1007" width="30.7" height="493" rx="8" fill="rgba(37,211,102,0.45)"/><rect x="505.3" y="1489" width="30.7" height="11" rx="8" fill="rgba(37,211,102,0.45)"/><rect x="544.0" y="1007" width="30.7" height="493" rx="8" fill="rgba(37,211,102,0.45)"/><rect x="582.7" y="1489" width="30.7" height="11" rx="8" fill="rgba(37,211,102,0.45)"/><rect x="621.3" y="1034" width="30.7" height="466" rx="8" fill="rgba(37,211,102,0.45)"/><rect x="660.0" y="1435" width="30.7" height="65" rx="8" fill="rgba(37,211,102,0.45)"/><rect x="698.7" y="1034" width="30.7" height="466" rx="8" fill="rgba(37,211,102,0.45)"/><rect x="737.3" y="1431" width="30.7" height="69" rx="8" fill="rgba(37,211,102,0.45)"/><rect x="776.0" y="980" width="30.7" height="520" rx="8" fill="#25D366"/><rect x="814.7" y="1485" width="30.7" height="15" rx="8" fill="rgba(37,211,102,0.45)"/><rect x="853.3" y="980" width="30.7" height="520" rx="8" fill="rgba(37,211,102,0.45)"/><rect x="892.0" y="1485" width="30.7" height="15" rx="8" fill="rgba(37,211,102,0.45)"/><rect x="930.7" y="1041" width="30.7" height="459" rx="8" fill="rgba(37,211,102,0.45)"/><rect x="969.3" y="1431" width="30.7" height="69" rx="8" fill="rgba(37,211,102,0.45)"/>
+    <line x1="80" y1="1500" x2="1000" y2="1500" stroke="rgba(255,255,255,0.25)" stroke-width="2"/>
+    <text x="95.3" y="1546" fill="rgba(255,255,255,0.5)" font-size="30" font-weight="600" text-anchor="middle">12AM</text><text x="327.3" y="1546" fill="rgba(255,255,255,0.5)" font-size="30" font-weight="600" text-anchor="middle">6AM</text><text x="559.3" y="1546" fill="rgba(255,255,255,0.5)" font-size="30" font-weight="600" text-anchor="middle">12PM</text><text x="791.3" y="1546" fill="rgba(255,255,255,0.5)" font-size="30" font-weight="600" text-anchor="middle">6PM</text>
+    <text x="80" y="1620" fill="rgba(255,255,255,0.5)" font-size="34" font-weight="600">messages by hour of day</text>
+  <text x="80" y="1830" fill="rgba(255,255,255,0.5)" font-size="30" font-weight="600" letter-spacing="1">whatsapp-mcp-plus</text>
+  <text x="1000" y="1830" fill="rgba(255,255,255,0.5)" font-size="30" font-weight="700" text-anchor="end">03</text>
+</svg>

@@ -16,15 +16,23 @@ layer it never had.
 > get your number banned. This tool is designed to minimize that risk, but cannot
 > eliminate it.
 
-## WhatsApp Wrapped, from your own chats
+## WhatsApp Rewind, from your own chats
 
-Ask your AI for `whatsapp_wrapped` (a terminal card) or `wrapped_card` (a
-shareable SVG). Sample output on demo data:
+Ask your AI for `whatsapp_rewind` to generate a **Spotify-Wrapped-style set of
+story cards** (1080×1920 SVG) from your history, cover, top people, your daily
+rhythm, top emojis, reply-speed leaderboard, and by-the-numbers:
 
-<img src="docs/sample-wrapped.svg" alt="WhatsApp Wrapped sample card" width="360">
+<p>
+  <img src="docs/rewind/01-cover.svg" alt="Rewind cover" width="150">
+  <img src="docs/rewind/02-people.svg" alt="Top people" width="150">
+  <img src="docs/rewind/03-rhythm.svg" alt="Your rhythm" width="150">
+  <img src="docs/rewind/05-replies.svg" alt="Reply speed" width="150">
+</p>
 
-Also: `response_leaderboard` (who you reply to fastest / leave on read longest),
-`chat_stats` (per-chat, with reply times), `top_words`, and `export_chat`.
+Prefer a single card? `wrapped_card` writes one shareable SVG; `whatsapp_wrapped`
+prints a terminal card. Also: `response_leaderboard` (who you reply to fastest /
+leave on read longest), `chat_stats` (per-chat, with reply times), `top_words`,
+and `export_chat`.
 
 ## Why this instead of the original
 
@@ -121,10 +129,10 @@ Every knob is an env var: `WAMCP_ALLOWLIST_ONLY`, `WAMCP_REQUIRE_CONFIRM`,
 `check_number_on_whatsapp`, `get_profile_picture`
 **Presence / profile:** `send_presence`, `set_profile_status`, `set_profile_name`
 **Media / intelligence:** `download_media`, `transcribe_voice_message`
-**Analytics:** `whatsapp_wrapped` (stats card), `wrapped_card` (shareable SVG),
-`response_leaderboard` (who you reply to fastest / leave on read longest),
-`top_words`, `chat_stats` (per-chat, incl. response times), `export_chat`
-(markdown/text transcript)
+**Analytics:** `whatsapp_rewind` (6-card story set), `wrapped_card` (single
+shareable SVG), `whatsapp_wrapped` (terminal card), `response_leaderboard` (who
+you reply to fastest / leave on read longest), `top_words`, `chat_stats`
+(per-chat, incl. response times), `export_chat` (markdown/text transcript)
 **Control:** `get_status`, `get_me`, `set_mode`, `confirm_action`,
 `allowlist_add/remove/list`
 

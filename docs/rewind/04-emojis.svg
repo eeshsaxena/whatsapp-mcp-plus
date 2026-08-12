@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+  <defs>
+    <linearGradient id="g4" x1="0" y1="0" x2="0.047" y2="0.711">
+      <stop offset="0" stop-color="#241047"/>
+      <stop offset="1" stop-color="#6d28d9"/>
+    </linearGradient>
+  </defs>
+  <rect width="1080" height="1920" fill="url(#g4)"/>
+  
+    <text x="80" y="300" fill="rgba(255,255,255,0.74)" font-size="34" font-weight="800" letter-spacing="6">YOUR MOOD</text>
+    <text x="80" y="470" fill="#F6F8F9" font-size="120" font-weight="900" letter-spacing="-2">Top emojis</text>
+    <text x="540" y="800" font-size="240" text-anchor="middle">🥹</text>
+    <text x="540" y="700" fill="rgba(255,255,255,0.74)" font-size="40" font-weight="700" text-anchor="middle" letter-spacing="2">MOST USED · 184×</text>
+    
+      <text x="150" y="1050" font-size="130" text-anchor="middle">🥹</text>
+      <text x="150" y="1130" fill="rgba(255,255,255,0.74)" font-size="44" font-weight="800" text-anchor="middle">184</text>
+      <text x="650" y="1050" font-size="130" text-anchor="middle">❤️</text>
+      <text x="650" y="1130" fill="rgba(255,255,255,0.74)" font-size="44" font-weight="800" text-anchor="middle">184</text>
+      <text x="150" y="1310" font-size="130" text-anchor="middle">😂</text>
+      <text x="150" y="1390" fill="rgba(255,255,255,0.74)" font-size="44" font-weight="800" text-anchor="middle">184</text>
+      <text x="650" y="1310" font-size="130" text-anchor="middle">🔥</text>
+      <text x="650" y="1390" fill="rgba(255,255,255,0.74)" font-size="44" font-weight="800" text-anchor="middle">184</text>
+      <text x="150" y="1570" font-size="130" text-anchor="middle">✨</text>
+      <text x="150" y="1650" fill="rgba(255,255,255,0.74)" font-size="44" font-weight="800" text-anchor="middle">182</text>
+      <text x="650" y="1570" font-size="130" text-anchor="middle">🙏</text>
+      <text x="650" y="1650" fill="rgba(255,255,255,0.74)" font-size="44" font-weight="800" text-anchor="middle">180</text>
+  <text x="80" y="1830" fill="rgba(255,255,255,0.5)" font-size="30" font-weight="600" letter-spacing="1">whatsapp-mcp-plus</text>
+  <text x="1000" y="1830" fill="rgba(255,255,255,0.5)" font-size="30" font-weight="700" text-anchor="end">04</text>
+</svg>

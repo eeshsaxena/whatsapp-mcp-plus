@@ -582,6 +582,8 @@ export interface WrappedStats {
   activeChats: number;
   wordsSent: number;
   longestStreakDays: number;
+  hourly: number[]; // 24 buckets, message counts by hour-of-day
+  daily: number[];  // 7 buckets, Sun..Sat
 }
 
 const STOPWORDS = new Set([
@@ -726,6 +728,8 @@ export function computeWrapped(sinceIso?: string | null, topN = 10): WrappedStat
     activeChats: totals?.active_chats ?? 0,
     wordsSent,
     longestStreakDays,
+    hourly: hourCounts,
+    daily: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => dayCounts[d] ?? 0),
   };
 }
 

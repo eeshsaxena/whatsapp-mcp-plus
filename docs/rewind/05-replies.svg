@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+  <defs>
+    <linearGradient id="g5" x1="0" y1="0" x2="0.017" y2="0.629">
+      <stop offset="0" stop-color="#0b141a"/>
+      <stop offset="1" stop-color="#14532d"/>
+    </linearGradient>
+  </defs>
+  <rect width="1080" height="1920" fill="url(#g5)"/>
+  
+    <text x="80" y="300" fill="rgba(255,255,255,0.74)" font-size="34" font-weight="800" letter-spacing="6">REPLY SPEED</text>
+    <text x="80" y="470" fill="#F6F8F9" font-size="110" font-weight="900" letter-spacing="-2">Left on read?</text>
+
+    <text x="80" y="650" fill="#7CF3B0" font-size="46" font-weight="800">⚡ You reply fastest to</text>
+    <text x="80" y="760" fill="#F6F8F9" font-size="52" font-weight="800">1. Mom</text>
+      <text x="1000" y="760" fill="#7CF3B0" font-size="52" font-weight="900" text-anchor="end">40s</text><text x="80" y="890" fill="#F6F8F9" font-size="52" font-weight="800">2. Aisha ❤️</text>
+      <text x="1000" y="890" fill="#7CF3B0" font-size="52" font-weight="900" text-anchor="end">2m</text><text x="80" y="1020" fill="#F6F8F9" font-size="52" font-weight="800">3. Rohan</text>
+      <text x="1000" y="1020" fill="#7CF3B0" font-size="52" font-weight="900" text-anchor="end">4m</text>
+
+    <text x="80" y="1260" fill="#FFCE73" font-size="46" font-weight="800">🐌 You leave on read longest</text>
+    <text x="80" y="1370" fill="#F6F8F9" font-size="52" font-weight="800">1. Landlord</text>
+      <text x="1000" y="1370" fill="#FFCE73" font-size="52" font-weight="900" text-anchor="end">30m</text><text x="80" y="1500" fill="#F6F8F9" font-size="52" font-weight="800">2. Study Group</text>
+      <text x="1000" y="1500" fill="#FFCE73" font-size="52" font-weight="900" text-anchor="end">12m</text><text x="80" y="1630" fill="#F6F8F9" font-size="52" font-weight="800">3. Rohan</text>
+      <text x="1000" y="1630" fill="#FFCE73" font-size="52" font-weight="900" text-anchor="end">4m</text>
+  <text x="80" y="1830" fill="rgba(255,255,255,0.5)" font-size="30" font-weight="600" letter-spacing="1">whatsapp-mcp-plus</text>
+  <text x="1000" y="1830" fill="rgba(255,255,255,0.5)" font-size="30" font-weight="700" text-anchor="end">05</text>
+</svg>

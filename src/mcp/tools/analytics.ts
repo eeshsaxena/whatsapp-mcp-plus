@@ -4,6 +4,7 @@ import path from "node:path";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { computeWrapped, computeResponseLeaderboard, computeTopWords } from "../../db.ts";
 import { renderWrappedSVG } from "../../analytics/card.ts";
+import { renderRewindCards } from "../../analytics/rewind.ts";
 import { config } from "../../config.ts";
 import { jsonResult, textResult, safeHandler } from "../format.ts";
 
@@ -77,6 +78,33 @@ export function registerAnalyticsTools(server: McpServer): void {
     },
     safeHandler(async ({ chat_jid, period, limit }: any) => {
       return jsonResult(computeTopWords(chat_jid ?? null, limit, periodToSince(period)));
+    }),
+  );
+
+  server.tool(
+    "whatsapp_rewind",
+    {
+      period: z.enum(["week", "month", "year", "all"]).default("all"),
+      output_dir: z.string().optional().describe("Directory to write the story cards (defaults to <data>/rewind)"),
+      subtitle: z.string().optional(),
+    },
+    safeHandler(async ({ period, output_dir, subtitle }: any) => {
+      const stats = computeWrapped(periodToSince(period), 10);
+      const board = computeResponseLeaderboard(3, 3);
+      const cards = renderRewindCards(stats, board, { subtitle: subtitle ?? `your ${period} in messages` });
+      const dir = output_dir || path.join(config.dataDir, "rewind");
+      fs.mkdirSync(dir, { recursive: true });
+      const written = cards.map((c) => {
+        const p = path.join(dir, `${c.name}.svg`);
+        fs.writeFileSync(p, c.svg, "utf-8");
+        return p;
+      });
+      return jsonResult({
+        count: written.length,
+        dir,
+        cards: written,
+        note: "A set of 1080x1920 story cards (SVG). Convert to PNG to post to WhatsApp/Instagram Stories.",
+      });
     }),
   );
 
