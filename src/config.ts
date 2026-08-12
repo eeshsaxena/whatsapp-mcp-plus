@@ -37,12 +37,16 @@ export interface Config {
    */
   allowlistOnly: boolean;
   rateLimit: RateLimitConfig;
-  /** Open the QR in a browser in addition to printing it in the terminal. */
-  openQrInBrowser: boolean;
   /** Optional path to a whisper-compatible transcription binary/endpoint. */
   transcriptionCmd: string | null;
   /** Persist the raw encoded message proto so media/forward work for old messages. */
   storeRaw: boolean;
+  /**
+   * If non-empty, files may only be SENT from these directories. Anti-exfiltration
+   * guard: a prompt-injected agent then cannot send e.g. ~/.ssh/id_rsa. Empty = no
+   * restriction. Set via WAMCP_SEND_FILE_ROOTS (comma-separated).
+   */
+  sendFileRoots: string[];
 }
 
 function resolveMode(): SafetyMode {
@@ -94,15 +98,16 @@ export const config: Config = {
     minGapMs: envInt("WAMCP_MIN_GAP_MS", 3000),
     jitterMs: envInt("WAMCP_JITTER_MS", 2500),
   },
-  openQrInBrowser: envBool("WAMCP_OPEN_QR_BROWSER", false),
   transcriptionCmd: process.env.WAMCP_TRANSCRIPTION_CMD || null,
   storeRaw: envBool("WAMCP_STORE_RAW", true),
+  sendFileRoots: (process.env.WAMCP_SEND_FILE_ROOTS || "")
+    .split(",").map((s) => s.trim()).filter(Boolean),
 };
 
 export function ensureDirs(): void {
-  for (const d of [config.dataDir, config.authDir]) {
-    if (!fs.existsSync(d)) fs.mkdirSync(d, { recursive: true });
-  }
+  if (!fs.existsSync(config.dataDir)) fs.mkdirSync(config.dataDir, { recursive: true });
+  // auth_info holds pairing credentials — create it restricted (0700 where the OS honors it).
+  if (!fs.existsSync(config.authDir)) fs.mkdirSync(config.authDir, { recursive: true, mode: 0o700 });
 }
 
 /** Human-readable summary used by the get_status tool and startup banner. */

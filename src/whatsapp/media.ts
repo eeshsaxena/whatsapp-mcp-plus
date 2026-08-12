@@ -8,6 +8,7 @@ import { getCachedMessage } from "./msgcache.ts";
 import { getRawMessage } from "../db.ts";
 import { detectMediaType } from "./parse.ts";
 import { waCall } from "./guard.ts";
+import { sanitizeFilename } from "../security.ts";
 
 /**
  * Download the media of a (recently seen) message to disk and return the path.
@@ -38,7 +39,9 @@ export async function downloadMessageMedia(
   const extByType: Record<string, string> = {
     image: ".jpg", video: ".mp4", audio: ".ogg", document: ".bin", sticker: ".webp", file: ".bin",
   };
-  const outPath = path.join(mediaDir, `${messageId}${extByType[mediaType] ?? ".bin"}`);
+  // Message ids come from WhatsApp/senders; sanitize before using in a path so
+  // a crafted id cannot traverse out of the media directory.
+  const outPath = path.join(mediaDir, `${sanitizeFilename(messageId)}${extByType[mediaType] ?? ".bin"}`);
   fs.writeFileSync(outPath, buffer);
   return { path: outPath, mediaType };
 }

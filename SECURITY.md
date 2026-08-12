@@ -20,7 +20,19 @@ make the agent exfiltrate your data or send messages on your behalf. Mitigations
 
 **Local data.** All messages are stored in a local SQLite DB and never leave your
 machine except through an explicit tool call by your agent. Pairing credentials
-live in `auth_info/` and are git-ignored. Do not commit `data/` or `auth_info/`.
+live in `auth_info/` (created with `0700` where the OS honors it) and are
+git-ignored. Do not commit `data/` or `auth_info/`.
+
+**Filesystem hardening.**
+- **Path traversal:** WhatsApp message ids (which a sender can craft) are
+  sanitized before being used in media filenames, so a crafted id cannot write
+  outside the media directory. Output paths are rejected if they contain a NUL byte.
+- **Exfiltration guard:** set `WAMCP_SEND_FILE_ROOTS` to a comma-separated list of
+  directories to restrict which files may be *sent*. With it set, a prompt-injected
+  agent cannot send `~/.ssh/id_rsa` or other sensitive files to a contact.
+- **No shell:** the optional transcription command runs via `spawnSync` with an
+  argument array (no shell), so message content cannot inject shell commands.
+- **Parameterized SQL** throughout; `LIKE` patterns escape user wildcards.
 
 **Account safety.** This uses an unofficial WhatsApp client (Baileys); misuse can
 get your number banned. Rate limiting, allowlisting, and read-only defaults are

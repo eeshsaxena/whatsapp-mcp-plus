@@ -24,10 +24,11 @@
     "test:bughunt": "node test/bughunt-test.mjs",
     "test:pure": "node test/pure-test.mjs",
     "test:guard": "node test/guard-test.mjs",
+    "test:security": "node test/security-test.mjs",
     "test:safety": "node test/safety-test.mjs",
     "test:mcp": "node test/smoke-mcp.mjs",
     "test:call": "node test/smoke-call.mjs",
-    "test": "npm run build && npm run test:pure && npm run test:guard && npm run test:safety && npm run test:logic && npm run test:features && npm run test:bughunt && npm run test:mcp",
+    "test": "npm run build && npm run test:pure && npm run test:guard && npm run test:security && npm run test:safety && npm run test:logic && npm run test:features && npm run test:bughunt && npm run test:mcp",
     "demo": "npm run build && node scripts/demo.mjs",
     "card": "npm run build && node scripts/gen-sample-card.mjs",
     "rewind": "npm run build && node scripts/gen-rewind.mjs"

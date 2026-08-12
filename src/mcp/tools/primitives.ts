@@ -14,6 +14,7 @@ import {
 } from "../../whatsapp/actions.ts";
 import { assertMutationsAllowed, guardedSend } from "../../safety/index.ts";
 import { textResult, jsonResult, safeHandler, errorResult } from "../format.ts";
+import { normalizeRecipient } from "./send.ts";
 
 function keyForMessage(messageId: string) {
   const row = getMessageById(messageId);
@@ -101,7 +102,7 @@ export function registerPrimitiveTools(server: McpServer): void {
     safeHandler(async ({ message_id, recipient, confirm_token }: any) => {
       const row = getMessageById(message_id);
       if (!row) return errorResult(`Unknown message id ${message_id}`);
-      const jid = recipient.includes("@") ? recipient : `${recipient.replace(/[^0-9]/g, "")}@s.whatsapp.net`;
+      const jid = normalizeRecipient(recipient);
       // Prefer a true native forward (keeps media) when we still have the proto;
       // otherwise fall back to re-sending the stored text.
       const original = getCachedMessage(message_id) ?? getRawMessage(message_id);

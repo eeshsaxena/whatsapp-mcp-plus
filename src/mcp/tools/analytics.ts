@@ -6,6 +6,7 @@ import { computeWrapped, computeResponseLeaderboard, computeTopWords } from "../
 import { renderWrappedSVG } from "../../analytics/card.ts";
 import { renderRewindCards } from "../../analytics/rewind.ts";
 import { config } from "../../config.ts";
+import { assertNoNullByte } from "../../security.ts";
 import { jsonResult, textResult, safeHandler } from "../format.ts";
 
 /** Turn a period keyword into an ISO "since" cutoff. */
@@ -59,6 +60,7 @@ export function registerAnalyticsTools(server: McpServer): void {
       const stats = computeWrapped(periodToSince(period), 10);
       const svg = renderWrappedSVG(stats, { title, subtitle });
       const out = output_path || path.join(config.dataDir, `whatsapp-wrapped-${period}.svg`);
+      assertNoNullByte(out, "output_path");
       fs.mkdirSync(path.dirname(out), { recursive: true });
       fs.writeFileSync(out, svg, "utf-8");
       return jsonResult({
@@ -93,6 +95,7 @@ export function registerAnalyticsTools(server: McpServer): void {
       const board = computeResponseLeaderboard(3, 3);
       const cards = renderRewindCards(stats, board, { subtitle: subtitle ?? `your ${period} in messages` });
       const dir = output_dir || path.join(config.dataDir, "rewind");
+      assertNoNullByte(dir, "output_dir");
       fs.mkdirSync(dir, { recursive: true });
       const written = cards.map((c) => {
         const p = path.join(dir, `${c.name}.svg`);

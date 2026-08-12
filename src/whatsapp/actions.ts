@@ -8,6 +8,13 @@ import fs from "node:fs";
 import path from "node:path";
 import { getConnectionState } from "./connection.ts";
 import { waCall, assertGroupJid, isValidReaction } from "./guard.ts";
+import { config } from "../config.ts";
+import { assertPathWithinRoots } from "../security.ts";
+
+function assertSendableFile(filePath: string): void {
+  assertPathWithinRoots(filePath, config.sendFileRoots);
+  if (!fs.existsSync(filePath)) throw new Error(`File not found: ${filePath}`);
+}
 
 /**
  * Raw WhatsApp actions. These do NOT enforce safety policy (that is the job of
@@ -71,7 +78,7 @@ export async function sendMediaFile(
   caption?: string,
 ): Promise<string | undefined> {
   assertSock(sock);
-  if (!fs.existsSync(filePath)) throw new Error(`File not found: ${filePath}`);
+  assertSendableFile(filePath);
   const stat = fs.statSync(filePath);
   if (!stat.isFile()) throw new Error(`Not a file: ${filePath}`);
   if (stat.size > 95 * 1024 * 1024) throw new Error("File exceeds WhatsApp's ~100MB limit.");
@@ -96,7 +103,7 @@ export async function sendVoiceNote(
   filePath: string,
 ): Promise<string | undefined> {
   assertSock(sock);
-  if (!fs.existsSync(filePath)) throw new Error(`File not found: ${filePath}`);
+  assertSendableFile(filePath);
   const buf = fs.readFileSync(filePath);
   const res = await waCall("send_voice_note", () => sock.sendMessage(jidNormalizedUser(jid), {
     audio: buf,

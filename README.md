@@ -155,6 +155,7 @@ audio is still downloaded and its path returned.
 | `WAMCP_RATE_PER_MINUTE` | `8` | max sends / minute |
 | `WAMCP_RATE_PER_DAY` | `200` | max sends / day |
 | `WAMCP_TRANSCRIPTION_CMD` | (none) | STT command template with `{input}` |
+| `WAMCP_SEND_FILE_ROOTS` | (none) | restrict which dirs files can be sent from (anti-exfiltration) |
 
 ## Account safety & Terms of Service
 
