@@ -65,6 +65,12 @@ db.storeMessage({ id: "w1", chat_jid: C, sender: C, content: "spectacular specta
 const words = db.computeTopWords(C, 10);
 check("top_words ranks repeated 'spectacular' first", words[0]?.word === "spectacular" && words[0]?.count === 2);
 
+// --- emoji extraction (sequence-aware) ---------------------------------------
+check("emoji keeps variation selector (❤️)", db.extractEmojis("love ❤️ you").includes("❤️"));
+check("emoji ZWJ family stays one token", db.extractEmojis("👨‍👩‍👧").length === 1);
+check("emoji counts repeats", db.extractEmojis("🔥🔥🔥").length === 3);
+check("emoji ignores plain text", db.extractEmojis("no emoji here").length === 0);
+
 db.closeDatabase();
 fs.rmSync(tmp, { recursive: true, force: true });
 console.log(`\n${pass} passed, ${fails} failed.`);

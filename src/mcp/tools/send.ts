@@ -8,9 +8,12 @@ import { jsonResult, safeHandler } from "../format.ts";
 
 /** Turn a bare phone number into a WhatsApp user JID; pass JIDs through. */
 export function normalizeRecipient(recipient: string): string {
-  const r = recipient.trim();
+  const r = (recipient ?? "").trim();
   if (r.includes("@")) return r;
   const digits = r.replace(/[^0-9]/g, "");
+  if (!digits) {
+    throw new Error(`Invalid recipient "${recipient}": expected a phone number (with country code) or a chat JID.`);
+  }
   return `${digits}@s.whatsapp.net`;
 }
 

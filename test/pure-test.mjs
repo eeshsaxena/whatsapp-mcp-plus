@@ -28,5 +28,8 @@ check("bare number -> user jid", normalizeRecipient("15551234567") === "15551234
 check("number with punctuation cleaned", normalizeRecipient("+1 (555) 123-4567") === "15551234567@s.whatsapp.net");
 check("existing user jid passthrough", normalizeRecipient("111@s.whatsapp.net") === "111@s.whatsapp.net");
 check("group jid passthrough", normalizeRecipient("123-456@g.us") === "123-456@g.us");
+let threw = false;
+try { normalizeRecipient("   "); } catch { threw = true; }
+check("normalizeRecipient rejects empty/no-digits", threw === true);
 
 console.log(`\n${pass} checks passed.`);

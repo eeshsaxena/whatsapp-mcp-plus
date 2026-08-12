@@ -133,6 +133,16 @@ export function escapeLike(s: string): string {
   return s.replace(/[\\%_]/g, (c) => "\\" + c);
 }
 
+/**
+ * Extract full emoji (incl. variation selectors, skin-tone modifiers, and ZWJ
+ * sequences like 👨‍👩‍👧) so the Wrapped card renders ❤️ not a bare ❤ and does
+ * not split family emoji into pieces.
+ */
+const EMOJI_RE = /\p{Extended_Pictographic}(?:️|[\u{1F3FB}-\u{1F3FF}]|‍\p{Extended_Pictographic})*/gu;
+export function extractEmojis(text: string): string[] {
+  return String(text || "").match(EMOJI_RE) ?? [];
+}
+
 function parseDateSafe(s: string | null | undefined): Date | null {
   if (!s) return null;
   const d = new Date(s);
@@ -663,12 +673,10 @@ export function computeWrapped(sinceIso?: string | null, topN = 10): WrappedStat
   }
 
   // Emoji frequency across message content.
-  const emojiRegex = /(\p{Extended_Pictographic})/gu;
   const emojiCounts: Record<string, number> = {};
   const contentRows = db.prepare(`SELECT content FROM messages WHERE timestamp >= ?`).all(since) as any[];
   for (const r of contentRows) {
-    const matches = String(r.content || "").match(emojiRegex);
-    if (matches) for (const e of matches) emojiCounts[e] = (emojiCounts[e] ?? 0) + 1;
+    for (const e of extractEmojis(r.content)) emojiCounts[e] = (emojiCounts[e] ?? 0) + 1;
   }
   const topEmojis = Object.entries(emojiCounts)
     .sort((a, b) => b[1] - a[1])
@@ -744,15 +752,13 @@ export function computeChatStats(chatJid: string): ChatStats {
   const theirResponses: number[] = [];
   let prev: { fromMe: boolean; t: number } | null = null;
 
-  const emojiRegex = /(\p{Extended_Pictographic})/gu;
   const emojiCounts: Record<string, number> = {};
 
   for (const r of rows) {
     const fromMe = Boolean(r.is_from_me);
     const t = parseDateSafe(r.timestamp)?.getTime() ?? 0;
     if (fromMe) sent++; else received++;
-    const em = String(r.content || "").match(emojiRegex);
-    if (em) for (const e of em) emojiCounts[e] = (emojiCounts[e] ?? 0) + 1;
+    for (const e of extractEmojis(r.content)) emojiCounts[e] = (emojiCounts[e] ?? 0) + 1;
 
     if (prev && prev.fromMe !== fromMe && t >= prev.t) {
       const gapSec = (t - prev.t) / 1000;

@@ -81,7 +81,10 @@ export async function startWhatsAppConnection(logger: Logger): Promise<WhatsAppS
         logger.warn(`Connection closed: ${DisconnectReason[statusCode] || "unknown"}`);
         if (statusCode !== DisconnectReason.loggedOut) {
           connState = "connecting";
-          setTimeout(() => startWhatsAppConnection(logger), 2000);
+          setTimeout(() => {
+            startWhatsAppConnection(logger).catch((e) =>
+              logger.error({ err: e }, "Reconnect attempt failed; will retry on next close."));
+          }, 2000);
         } else {
           connState = "logged-out";
           logger.error("Logged out. Delete the auth_info directory and restart to re-pair.");
