@@ -6,17 +6,29 @@ import {
 } from "baileys";
 import fs from "node:fs";
 import path from "node:path";
+import { getConnectionState } from "./connection.ts";
+import { waCall, assertGroupJid, isValidReaction } from "./guard.ts";
 
 /**
- * Raw WhatsApp actions. These are intentionally "dumb" — they do NOT enforce
- * safety policy. The safety gate lives in src/safety and wraps every mutating
- * call before it reaches here.
+ * Raw WhatsApp actions. These do NOT enforce safety policy (that is the job of
+ * src/safety), but every live Baileys call IS hardened here: bounded by a
+ * timeout and wrapped so failures surface as clear, actionable messages instead
+ * of raw Boom errors or a frozen tool call.
  */
 
+const SEND_TIMEOUT = 30_000;
+const MEDIA_TIMEOUT = 90_000;
+const QUERY_TIMEOUT = 20_000;
+
 function assertSock(sock: WASocket | null): asserts sock is WASocket {
-  if (!sock || !sock.user) {
-    throw new Error("WhatsApp is not connected yet. Wait for pairing to complete.");
+  if (sock && sock.user) return;
+  const state = getConnectionState();
+  if (state === "logged-out") {
+    throw new Error("WhatsApp is logged out. Delete the auth_info directory and restart to re-pair.");
   }
+  throw new Error(
+    `WhatsApp is not connected yet (state: ${state}). Wait for pairing/sync to finish, then retry. Use get_status to check.`,
+  );
 }
 
 function guessMimeAndKind(filePath: string): { kind: "image" | "video" | "audio" | "document"; mimetype: string } {
@@ -47,7 +59,8 @@ export async function sendText(
   quoted?: proto.IWebMessageInfo,
 ): Promise<string | undefined> {
   assertSock(sock);
-  const res = await sock.sendMessage(jidNormalizedUser(jid), { text }, quoted ? { quoted } : undefined);
+  const res = await waCall("send_message", () =>
+    sock.sendMessage(jidNormalizedUser(jid), { text }, quoted ? { quoted } : undefined), SEND_TIMEOUT);
   return res?.key.id ?? undefined;
 }
 
@@ -59,6 +72,10 @@ export async function sendMediaFile(
 ): Promise<string | undefined> {
   assertSock(sock);
   if (!fs.existsSync(filePath)) throw new Error(`File not found: ${filePath}`);
+  const stat = fs.statSync(filePath);
+  if (!stat.isFile()) throw new Error(`Not a file: ${filePath}`);
+  if (stat.size > 95 * 1024 * 1024) throw new Error("File exceeds WhatsApp's ~100MB limit.");
+
   const { kind, mimetype } = guessMimeAndKind(filePath);
   const buf = fs.readFileSync(filePath);
   const fileName = path.basename(filePath);
@@ -69,7 +86,7 @@ export async function sendMediaFile(
   else if (kind === "audio") content = { audio: buf, mimetype };
   else content = { document: buf, mimetype, fileName, caption };
 
-  const res = await sock.sendMessage(jidNormalizedUser(jid), content);
+  const res = await waCall("send_file", () => sock.sendMessage(jidNormalizedUser(jid), content), MEDIA_TIMEOUT);
   return res?.key.id ?? undefined;
 }
 
@@ -81,12 +98,11 @@ export async function sendVoiceNote(
   assertSock(sock);
   if (!fs.existsSync(filePath)) throw new Error(`File not found: ${filePath}`);
   const buf = fs.readFileSync(filePath);
-  // Best sent as .ogg/opus; other formats may not render as a playable voice note.
-  const res = await sock.sendMessage(jidNormalizedUser(jid), {
+  const res = await waCall("send_voice_note", () => sock.sendMessage(jidNormalizedUser(jid), {
     audio: buf,
     ptt: true,
     mimetype: "audio/ogg; codecs=opus",
-  });
+  }), MEDIA_TIMEOUT);
   return res?.key.id ?? undefined;
 }
 
@@ -96,13 +112,16 @@ export async function reactToMessage(
   emoji: string,
 ): Promise<void> {
   assertSock(sock);
-  await sock.sendMessage(key.remoteJid!, { react: { text: emoji, key } });
+  if (!isValidReaction(emoji)) throw new Error(`Invalid reaction "${emoji}" (use a single emoji, or "" to clear).`);
+  if (!key.remoteJid) throw new Error("Message key is missing remoteJid.");
+  await waCall("react_to_message", () => sock.sendMessage(key.remoteJid!, { react: { text: emoji, key } }), SEND_TIMEOUT);
 }
 
 /** Delete for everyone. */
 export async function deleteMessage(sock: WASocket | null, key: WAMessageKey): Promise<void> {
   assertSock(sock);
-  await sock.sendMessage(key.remoteJid!, { delete: key });
+  if (!key.remoteJid) throw new Error("Message key is missing remoteJid.");
+  await waCall("delete_message", () => sock.sendMessage(key.remoteJid!, { delete: key }), SEND_TIMEOUT);
 }
 
 export async function editMessage(
@@ -111,24 +130,19 @@ export async function editMessage(
   newText: string,
 ): Promise<void> {
   assertSock(sock);
-  await sock.sendMessage(key.remoteJid!, { text: newText, edit: key });
+  if (!key.remoteJid) throw new Error("Message key is missing remoteJid.");
+  await waCall("edit_message", () => sock.sendMessage(key.remoteJid!, { text: newText, edit: key }), SEND_TIMEOUT);
 }
 
-/**
- * Forward is best-effort: WhatsApp's native forward needs the original proto
- * message which we don't persist. We re-send the stored text with a forwarded
- * marker instead. (A future version can keep the full proto to enable true
- * media forwarding.)
- */
+/** Text-only fallback forward (used when the original proto is unavailable). */
 export async function forwardText(
   sock: WASocket | null,
   toJid: string,
   contentText: string,
 ): Promise<string | undefined> {
   assertSock(sock);
-  const res = await sock.sendMessage(jidNormalizedUser(toJid), {
-    text: contentText,
-  });
+  const res = await waCall("forward_message", () =>
+    sock.sendMessage(jidNormalizedUser(toJid), { text: contentText }), SEND_TIMEOUT);
   return res?.key.id ?? undefined;
 }
 
@@ -139,13 +153,15 @@ export async function forwardMessage(
   original: proto.IWebMessageInfo,
 ): Promise<string | undefined> {
   assertSock(sock);
-  const res = await sock.sendMessage(jidNormalizedUser(toJid), { forward: original });
+  const res = await waCall("forward_message", () =>
+    sock.sendMessage(jidNormalizedUser(toJid), { forward: original }), MEDIA_TIMEOUT);
   return res?.key.id ?? undefined;
 }
 
 export async function markRead(sock: WASocket | null, keys: WAMessageKey[]): Promise<void> {
   assertSock(sock);
-  await sock.readMessages(keys);
+  if (!keys.length) return;
+  await waCall("mark_read", () => sock.readMessages(keys), QUERY_TIMEOUT);
 }
 
 export type PresenceType = "available" | "unavailable" | "composing" | "recording" | "paused";
@@ -155,7 +171,7 @@ export async function sendPresence(
   type: PresenceType,
 ): Promise<void> {
   assertSock(sock);
-  await sock.sendPresenceUpdate(type, jidNormalizedUser(jid));
+  await waCall("send_presence", () => sock.sendPresenceUpdate(type, jidNormalizedUser(jid)), QUERY_TIMEOUT);
 }
 
 export async function sendLocation(
@@ -167,9 +183,12 @@ export async function sendLocation(
   address?: string,
 ): Promise<string | undefined> {
   assertSock(sock);
-  const res = await sock.sendMessage(jidNormalizedUser(jid), {
+  if (Math.abs(latitude) > 90 || Math.abs(longitude) > 180) {
+    throw new Error("Invalid coordinates (lat must be -90..90, lng -180..180).");
+  }
+  const res = await waCall("send_location", () => sock.sendMessage(jidNormalizedUser(jid), {
     location: { degreesLatitude: latitude, degreesLongitude: longitude, name, address },
-  });
+  }), SEND_TIMEOUT);
   return res?.key.id ?? undefined;
 }
 
@@ -181,9 +200,10 @@ export async function sendPoll(
   selectableCount = 1,
 ): Promise<string | undefined> {
   assertSock(sock);
-  const res = await sock.sendMessage(jidNormalizedUser(jid), {
+  if (values.length < 2) throw new Error("A poll needs at least 2 options.");
+  const res = await waCall("send_poll", () => sock.sendMessage(jidNormalizedUser(jid), {
     poll: { name, values, selectableCount },
-  });
+  }), SEND_TIMEOUT);
   return res?.key.id ?? undefined;
 }
 
@@ -195,15 +215,16 @@ export async function sendContactCard(
 ): Promise<string | undefined> {
   assertSock(sock);
   const waid = phoneNumber.replace(/[^0-9]/g, "");
+  if (!waid) throw new Error("contact_phone must contain digits.");
   const vcard =
     "BEGIN:VCARD\n" +
     "VERSION:3.0\n" +
     `FN:${displayName}\n` +
     `TEL;type=CELL;type=VOICE;waid=${waid}:${phoneNumber}\n` +
     "END:VCARD";
-  const res = await sock.sendMessage(jidNormalizedUser(jid), {
+  const res = await waCall("send_contact", () => sock.sendMessage(jidNormalizedUser(jid), {
     contacts: { displayName, contacts: [{ vcard }] },
-  });
+  }), SEND_TIMEOUT);
   return res?.key.id ?? undefined;
 }
 
@@ -211,7 +232,8 @@ export async function sendContactCard(
 
 export async function createGroup(sock: WASocket | null, subject: string, participants: string[]) {
   assertSock(sock);
-  return sock.groupCreate(subject, participants.map(jidNormalizedUser));
+  if (!participants.length) throw new Error("Provide at least one participant.");
+  return waCall("create_group", () => sock.groupCreate(subject, participants.map(jidNormalizedUser)), 30_000);
 }
 
 export async function groupParticipants(
@@ -221,45 +243,53 @@ export async function groupParticipants(
   action: "add" | "remove" | "promote" | "demote",
 ) {
   assertSock(sock);
-  return sock.groupParticipantsUpdate(groupJid, participants.map(jidNormalizedUser), action);
+  assertGroupJid(groupJid);
+  if (!participants.length) throw new Error("Provide at least one participant.");
+  return waCall("group_update_participants", () =>
+    sock.groupParticipantsUpdate(groupJid, participants.map(jidNormalizedUser), action), QUERY_TIMEOUT);
 }
 
 export async function groupSetSubject(sock: WASocket | null, groupJid: string, subject: string) {
   assertSock(sock);
-  await sock.groupUpdateSubject(groupJid, subject);
+  assertGroupJid(groupJid);
+  await waCall("group_set_subject", () => sock.groupUpdateSubject(groupJid, subject), QUERY_TIMEOUT);
 }
 
 export async function groupSetDescription(sock: WASocket | null, groupJid: string, description: string) {
   assertSock(sock);
-  await sock.groupUpdateDescription(groupJid, description);
+  assertGroupJid(groupJid);
+  await waCall("group_set_description", () => sock.groupUpdateDescription(groupJid, description), QUERY_TIMEOUT);
 }
 
 export async function groupInviteLink(sock: WASocket | null, groupJid: string): Promise<string> {
   assertSock(sock);
-  const code = await sock.groupInviteCode(groupJid);
+  assertGroupJid(groupJid);
+  const code = await waCall("group_invite_link", () => sock.groupInviteCode(groupJid), QUERY_TIMEOUT);
   return `https://chat.whatsapp.com/${code}`;
 }
 
 export async function groupInfo(sock: WASocket | null, groupJid: string) {
   assertSock(sock);
-  return sock.groupMetadata(groupJid);
+  assertGroupJid(groupJid);
+  return waCall("group_info", () => sock.groupMetadata(groupJid), QUERY_TIMEOUT);
 }
 
 export async function groupLeave(sock: WASocket | null, groupJid: string) {
   assertSock(sock);
-  await sock.groupLeave(groupJid);
+  assertGroupJid(groupJid);
+  await waCall("group_leave", () => sock.groupLeave(groupJid), QUERY_TIMEOUT);
 }
 
 /* -------------------------------------------------- chat & account state */
 
 export async function pinChat(sock: WASocket | null, jid: string, pin: boolean) {
   assertSock(sock);
-  await sock.chatModify({ pin }, jidNormalizedUser(jid));
+  await waCall("pin_chat", () => sock.chatModify({ pin }, jidNormalizedUser(jid)), QUERY_TIMEOUT);
 }
 
 export async function muteChat(sock: WASocket | null, jid: string, durationMs: number | null) {
   assertSock(sock);
-  await sock.chatModify({ mute: durationMs }, jidNormalizedUser(jid));
+  await waCall("mute_chat", () => sock.chatModify({ mute: durationMs }, jidNormalizedUser(jid)), QUERY_TIMEOUT);
 }
 
 export async function starMessage(
@@ -270,15 +300,16 @@ export async function starMessage(
   star: boolean,
 ) {
   assertSock(sock);
-  await sock.chatModify(
+  await waCall("star_message", () => sock.chatModify(
     { star: { messages: [{ id: messageId, fromMe }], star } },
     jidNormalizedUser(jid),
-  );
+  ), QUERY_TIMEOUT);
 }
 
 export async function setBlockStatus(sock: WASocket | null, jid: string, block: boolean) {
   assertSock(sock);
-  await sock.updateBlockStatus(jidNormalizedUser(jid), block ? "block" : "unblock");
+  await waCall("block_contact", () =>
+    sock.updateBlockStatus(jidNormalizedUser(jid), block ? "block" : "unblock"), QUERY_TIMEOUT);
 }
 
 export async function checkOnWhatsApp(
@@ -286,9 +317,10 @@ export async function checkOnWhatsApp(
   numbers: string[],
 ): Promise<{ input: string; jid: string | null; exists: boolean }[]> {
   assertSock(sock);
-  const results = await sock.onWhatsApp(...numbers);
+  const results = await waCall("check_number_on_whatsapp", () => sock.onWhatsApp(...numbers), QUERY_TIMEOUT);
   return numbers.map((n) => {
-    const match = results?.find((r) => r.jid.startsWith(n.replace(/[^0-9]/g, "")));
+    const digits = n.replace(/[^0-9]/g, "");
+    const match = results?.find((r) => (r.jid.split("@")[0] ?? "") === digits);
     return { input: n, jid: match?.jid ?? null, exists: Boolean(match?.exists) };
   });
 }
@@ -296,18 +328,19 @@ export async function checkOnWhatsApp(
 export async function getProfilePicture(sock: WASocket | null, jid: string): Promise<string | null> {
   assertSock(sock);
   try {
-    return (await sock.profilePictureUrl(jidNormalizedUser(jid), "image")) ?? null;
+    return (await waCall("get_profile_picture", () =>
+      sock.profilePictureUrl(jidNormalizedUser(jid), "image"), QUERY_TIMEOUT)) ?? null;
   } catch {
-    return null; // no picture or not visible
+    return null; // no picture, private, or not reachable — treated as "none"
   }
 }
 
 export async function setProfileStatus(sock: WASocket | null, status: string) {
   assertSock(sock);
-  await sock.updateProfileStatus(status);
+  await waCall("set_profile_status", () => sock.updateProfileStatus(status), QUERY_TIMEOUT);
 }
 
 export async function setProfileName(sock: WASocket | null, name: string) {
   assertSock(sock);
-  await sock.updateProfileName(name);
+  await waCall("set_profile_name", () => sock.updateProfileName(name), QUERY_TIMEOUT);
 }

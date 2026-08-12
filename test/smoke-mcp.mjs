@@ -1,51 +1,50 @@
-// Minimal MCP stdio smoke test: initialize + tools/list, no WhatsApp needed.
+// Response-driven MCP stdio smoke test: initialize -> tools/list. No WhatsApp.
 import { spawn } from "node:child_process";
 
 const child = spawn("node", ["dist/index.js"], {
   stdio: ["pipe", "pipe", "inherit"],
-  env: { ...process.env, WAMCP_MODE: "read-only" },
+  env: { ...process.env, WAMCP_MODE: "read-only", WAMCP_NO_WA: "1" },
 });
 
 let buf = "";
-const seen = [];
+const handlers = new Map(); // id -> fn(msg)
 child.stdout.on("data", (d) => {
   buf += d.toString();
-  let idx;
-  while ((idx = buf.indexOf("\n")) >= 0) {
-    const line = buf.slice(0, idx).trim();
-    buf = buf.slice(idx + 1);
+  let i;
+  while ((i = buf.indexOf("\n")) >= 0) {
+    const line = buf.slice(0, i).trim();
+    buf = buf.slice(i + 1);
     if (!line) continue;
-    try { seen.push(JSON.parse(line)); } catch { /* non-json */ }
+    let msg;
+    try { msg = JSON.parse(line); } catch { continue; }
+    if (msg.id != null && handlers.has(msg.id)) handlers.get(msg.id)(msg);
   }
 });
+const send = (o) => child.stdin.write(JSON.stringify(o) + "\n");
 
-function send(obj) {
-  child.stdin.write(JSON.stringify(obj) + "\n");
+function fail(reason) {
+  console.log(reason);
+  child.kill();
+  process.exit(1);
 }
+const guard = setTimeout(() => fail("Timed out waiting for MCP responses."), 15000);
 
-setTimeout(() => {
-  send({ jsonrpc: "2.0", id: 1, method: "initialize", params: {
-    protocolVersion: "2024-11-05",
-    capabilities: {},
-    clientInfo: { name: "smoke", version: "0.0.0" },
-  }});
-}, 800);
-
-setTimeout(() => {
+// Step 1: initialize, wait for its response, then list tools.
+handlers.set(1, () => {
   send({ jsonrpc: "2.0", method: "notifications/initialized" });
-  send({ jsonrpc: "2.0", id: 2, method: "tools/list", params: {} });
-}, 1600);
-
-setTimeout(() => {
-  const listResp = seen.find((m) => m.id === 2);
-  if (listResp?.result?.tools) {
-    const names = listResp.result.tools.map((t) => t.name);
+  handlers.set(2, (msg) => {
+    clearTimeout(guard);
+    const names = msg.result?.tools?.map((t) => t.name) ?? [];
     console.log(`TOOLS (${names.length}):`);
     console.log(names.join(", "));
-  } else {
-    console.log("No tools/list response captured. Raw messages:");
-    console.log(JSON.stringify(seen, null, 2).slice(0, 1500));
-  }
-  child.kill();
-  process.exit(0);
-}, 3500);
+    child.kill();
+    process.exit(names.length > 0 ? 0 : 1);
+  });
+  send({ jsonrpc: "2.0", id: 2, method: "tools/list", params: {} });
+});
+
+// give the process a moment to attach its stdin reader, then send.
+setTimeout(() => send({
+  jsonrpc: "2.0", id: 1, method: "initialize",
+  params: { protocolVersion: "2024-11-05", capabilities: {}, clientInfo: { name: "smoke", version: "0.0.0" } },
+}), 300);

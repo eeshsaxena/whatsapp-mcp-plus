@@ -28,6 +28,13 @@ async function main(): Promise<void> {
   // protocol on a network call.
   await startMcpServer(logger);
 
+  // WAMCP_NO_WA=1 runs the MCP server without connecting to WhatsApp — used by
+  // the smoke tests and the demo so they are deterministic and network-free.
+  if (process.env.WAMCP_NO_WA === "1") {
+    logger.info("WAMCP_NO_WA=1: skipping WhatsApp connection (server-only mode).");
+    return;
+  }
+
   startWhatsAppConnection(waLogger).catch((err) => {
     logger.error({ err }, "WhatsApp connection failed to start; MCP tools will report disconnected.");
   });

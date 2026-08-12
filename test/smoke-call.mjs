@@ -3,7 +3,7 @@ import { spawn } from "node:child_process";
 
 const child = spawn("node", ["dist/index.js"], {
   stdio: ["pipe", "pipe", "inherit"],
-  env: { ...process.env, WAMCP_MODE: "read-only" },
+  env: { ...process.env, WAMCP_MODE: "read-only", WAMCP_NO_WA: "1" },
 });
 
 let buf = "";

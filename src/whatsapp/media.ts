@@ -7,6 +7,7 @@ import { logger } from "../logger.ts";
 import { getCachedMessage } from "./msgcache.ts";
 import { getRawMessage } from "../db.ts";
 import { detectMediaType } from "./parse.ts";
+import { waCall } from "./guard.ts";
 
 /**
  * Download the media of a (recently seen) message to disk and return the path.
@@ -25,12 +26,12 @@ export async function downloadMessageMedia(
     );
   }
   const mediaType = detectMediaType(msg) ?? "file";
-  const buffer = (await downloadMediaMessage(
+  const buffer = (await waCall("download_media", () => downloadMediaMessage(
     msg,
     "buffer",
     {},
     { logger: logger as any, reuploadRequest: (sock as any)?.updateMediaMessage },
-  )) as Buffer;
+  ), 90_000)) as Buffer;
 
   const mediaDir = path.join(config.dataDir, "media");
   if (!fs.existsSync(mediaDir)) fs.mkdirSync(mediaDir, { recursive: true });

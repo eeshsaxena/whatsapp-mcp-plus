@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { getSock } from "../../whatsapp/connection.ts";
+import { getSock, getConnectionState } from "../../whatsapp/connection.ts";
 import { describeSafety } from "../../config.ts";
 import { cacheSize } from "../../whatsapp/msgcache.ts";
 import {
@@ -25,6 +25,7 @@ export function registerAdminTools(server: McpServer): void {
       const sock = getSock();
       return jsonResult({
         connected: Boolean(sock?.user),
+        connection_state: getConnectionState(),
         me: sock?.user?.id ?? null,
         mode: getMode(),
         safety: describeSafety(),

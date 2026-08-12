@@ -10,6 +10,7 @@ const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "wamcp-demo-"));
 process.env.WAMCP_DATA_DIR = tmp;
 process.env.WAMCP_AUTH_DIR = path.join(tmp, "auth");
 process.env.WAMCP_MODE = "read-only";
+process.env.WAMCP_NO_WA = "1";
 
 // --- seed -------------------------------------------------------------------
 const db = await import("../dist/db.js");

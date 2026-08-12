@@ -36,12 +36,17 @@ Strategy + research rationale live in `BUILD_PLAN.md`.
   - `get_status` → correct safety/connection JSON.
   - `whatsapp_wrapped` → renders the shareable card (empty DB).
   - `send_message` in read-only mode → correctly BLOCKED by the safety gate.
-- **Test suite (`npm test`): 75 checks pass** across `test/pure-test.mjs` (13),
+- **Test suite (`npm test`): 88 checks pass in ~15s** across `test/pure-test.mjs`
+  (13), `test/guard-test.mjs` (Baileys hardening helpers, 13),
   `test/safety-test.mjs` (mode/allowlist/rate/confirm gate, 13),
   `test/logic-test.mjs` (22), `test/features-test.mjs` (chat_stats response times,
-  export, date range, leaderboard, SVG card, proto round-trip, 27), plus
-  `test/smoke-mcp.mjs` (tools/list = 51) and `test/smoke-call.mjs` (live calls +
-  read-only block). None require WhatsApp. CI runs the deterministic subset.
+  export, date range, leaderboard, SVG card, proto round-trip, 27), plus a
+  response-driven `test/smoke-mcp.mjs` (tools/list = 51) and `test/smoke-call.mjs`.
+  None require WhatsApp (WAMCP_NO_WA=1 runs server-only). CI runs the subset.
+- **Live Baileys layer hardened:** every action wrapped with a timeout + normalized
+  error message (src/whatsapp/guard.ts), state-aware connection guard, JID and
+  input validation. So tomorrow's live test yields clear errors, not frozen calls
+  or raw Boom stack traces. get_status reports connection_state.
 
 ### NOT yet tested (needs YOU — requires a live WhatsApp pairing / QR scan)
 Everything that actually talks to WhatsApp. I cannot scan the QR with your phone.

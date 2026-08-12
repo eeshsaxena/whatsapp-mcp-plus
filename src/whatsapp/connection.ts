@@ -31,6 +31,12 @@ export function getSock(): WhatsAppSocket | null {
   return currentSock;
 }
 
+export type ConnState = "connecting" | "open" | "close" | "logged-out";
+let connState: ConnState = "connecting";
+export function getConnectionState(): ConnState {
+  return connState;
+}
+
 export async function startWhatsAppConnection(logger: Logger): Promise<WhatsAppSocket> {
   initializeDatabase();
 
@@ -68,15 +74,20 @@ export async function startWhatsAppConnection(logger: Logger): Promise<WhatsAppS
         logger.info("QR code printed to terminal (stderr). Scan it with WhatsApp > Linked Devices.");
       }
 
-      if (connection === "close") {
+      if (connection === "connecting") {
+        connState = "connecting";
+      } else if (connection === "close") {
         const statusCode = (lastDisconnect?.error as any)?.output?.statusCode;
         logger.warn(`Connection closed: ${DisconnectReason[statusCode] || "unknown"}`);
         if (statusCode !== DisconnectReason.loggedOut) {
+          connState = "connecting";
           setTimeout(() => startWhatsAppConnection(logger), 2000);
         } else {
+          connState = "logged-out";
           logger.error("Logged out. Delete the auth_info directory and restart to re-pair.");
         }
       } else if (connection === "open") {
+        connState = "open";
         logger.info(`Connected as ${sock.user?.name ?? sock.user?.id}`);
       }
     }
