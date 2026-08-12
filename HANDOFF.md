@@ -64,6 +64,21 @@ mode (`WAMCP_MODE=assisted`):
 - download_media + transcribe_voice_message (set WAMCP_TRANSCRIPTION_CMD)
 - whatsapp_wrapped against real history (the shareable artifact)
 
+## Bug-hunt pass (found + fixed, all with regression tests)
+1. **SQL LIKE wildcard injection** — searching `%` or `_` matched everything;
+   now escaped across search_messages/contacts/list_chats.
+2. **Emoji sequences split** in Wrapped (❤️→❤, family emoji broken) — sequence-aware
+   `extractEmojis` now used everywhere.
+3. **react_to_message couldn't clear** (schema `min(1)` blocked the documented `''`).
+4. **delete_message** advertised a `for_everyone` param it ignored — removed + guarded.
+5. **message_type** captured wrapper keys (messageContextInfo) — now the real type.
+6. **Reconnect** could raise an unhandled rejection — wrapped in `.catch`.
+7. **normalizeRecipient** produced invalid `@s.whatsapp.net` for empty input — now errors.
+8. **Unbounded growth**: `sent_log` (now pruned to ~2 days), pending confirm tokens
+   (pruned on stage), msgcache size `NaN` on bad env (now guarded).
+- Baileys **6.7.24** API verified: ChatModification (pin/mute/star) and media
+  content (WAMediaUpload) shapes match; typecheck validates every typed call.
+
 ## Known limitations / debug candidates
 - **Media download, transcription, true forwarding** need the original message
   proto, held only in an in-memory LRU (`msgcache`, last 2000). Works for recent

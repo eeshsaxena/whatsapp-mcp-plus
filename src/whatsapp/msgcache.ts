@@ -8,7 +8,10 @@ import type { WAMessage } from "baileys";
  * the most recent N in memory so those operations work for recent messages.
  * Older messages return a clear "not in cache" error rather than failing oddly.
  */
-const MAX = Number(process.env.WAMCP_MSG_CACHE || 2000);
+const parsedMax = Number(process.env.WAMCP_MSG_CACHE);
+// Guard against a non-numeric env value producing NaN (which would disable
+// eviction entirely and leak memory).
+const MAX = Number.isFinite(parsedMax) && parsedMax > 0 ? parsedMax : 2000;
 const cache = new Map<string, WAMessage>();
 
 export function rememberMessage(msg: WAMessage): void {
