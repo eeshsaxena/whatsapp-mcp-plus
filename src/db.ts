@@ -125,6 +125,14 @@ export function initializeDatabase(): DatabaseSync {
   return db;
 }
 
+/**
+ * Escape LIKE wildcards so a user searching for "%" or "_" gets literal matches
+ * instead of matching everything. Pair with `LIKE ? ESCAPE '\'`.
+ */
+export function escapeLike(s: string): string {
+  return s.replace(/[\\%_]/g, (c) => "\\" + c);
+}
+
 function parseDateSafe(s: string | null | undefined): Date | null {
   if (!s) return null;
   const d = new Date(s);
@@ -312,8 +320,9 @@ export function getChats(
     `;
     const params: (string | number)[] = [];
     if (query) {
-      sql += ` WHERE (LOWER(COALESCE(c.name, ct.name, ct.notify, ct.phone_number)) LIKE LOWER(?) OR c.jid LIKE ?)`;
-      params.push(`%${query}%`, `%${query}%`);
+      const like = `%${escapeLike(query)}%`;
+      sql += ` WHERE (LOWER(COALESCE(c.name, ct.name, ct.notify, ct.phone_number)) LIKE LOWER(?) ESCAPE '\\' OR c.jid LIKE ? ESCAPE '\\')`;
+      params.push(like, like);
     }
     sql += sortBy === "last_active"
       ? ` ORDER BY c.last_message_time DESC NULLS LAST, c.jid ASC`
@@ -444,9 +453,9 @@ export function searchDbForContacts(query: string, limit = 20): { jid: string; n
     const rows = db.prepare(`
       SELECT jid, COALESCE(name, notify, phone_number, jid) AS display_name
       FROM contacts
-      WHERE LOWER(COALESCE(name, notify, phone_number, jid)) LIKE LOWER(?)
+      WHERE LOWER(COALESCE(name, notify, phone_number, jid)) LIKE LOWER(?) ESCAPE '\\'
       LIMIT ?
-    `).all(`%${query}%`, limit) as { jid: string; display_name: string | null }[];
+    `).all(`%${escapeLike(query)}%`, limit) as { jid: string; display_name: string | null }[];
     return rows.map((r) => ({ jid: r.jid, name: r.display_name }));
   } catch (e) {
     console.error("searchDbForContacts error", e);
@@ -461,9 +470,9 @@ export function searchMessages(searchQuery: string, chatJid?: string | null, lim
       SELECT m.*, COALESCE(c.name, ct.name, ct.notify, ct.phone_number) as chat_name
       FROM messages m JOIN chats c ON m.chat_jid = c.jid
       LEFT JOIN contacts ct ON c.jid = ct.jid
-      WHERE LOWER(m.content) LIKE LOWER(?)
+      WHERE LOWER(m.content) LIKE LOWER(?) ESCAPE '\\'
     `;
-    const params: (string | number | null)[] = [`%${searchQuery}%`];
+    const params: (string | number | null)[] = [`%${escapeLike(searchQuery)}%`];
     if (chatJid) { sql += ` AND m.chat_jid = ?`; params.push(chatJid); }
     sql += ` ORDER BY m.timestamp DESC LIMIT ? OFFSET ?`;
     params.push(limit, page * limit);

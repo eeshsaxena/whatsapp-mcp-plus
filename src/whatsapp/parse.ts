@@ -23,21 +23,26 @@ export function parseMessageForDb(msg: WAMessage): DbMessage | null {
   if (!msg.message || !msg.key || !msg.key.remoteJid) return null;
 
   const m = msg.message;
-  const messageType = Object.keys(m)[0] ?? "unknown";
   let content: string | null = null;
+  let messageType = "unknown";
 
-  if (m.conversation) content = m.conversation;
-  else if (m.extendedTextMessage?.text) content = m.extendedTextMessage.text;
-  else if (m.imageMessage) content = `[Image] ${m.imageMessage.caption ?? ""}`.trim();
-  else if (m.videoMessage) content = `[Video] ${m.videoMessage.caption ?? ""}`.trim();
-  else if (m.documentMessage)
+  // Note: use the branch that actually matched for message_type, not
+  // Object.keys(m)[0] — the first key is often a wrapper like
+  // messageContextInfo / senderKeyDistributionMessage, not the real content.
+  if (m.conversation != null && m.conversation !== "") { content = m.conversation; messageType = "text"; }
+  else if (m.extendedTextMessage?.text) { content = m.extendedTextMessage.text; messageType = "text"; }
+  else if (m.imageMessage) { content = `[Image] ${m.imageMessage.caption ?? ""}`.trim(); messageType = "image"; }
+  else if (m.videoMessage) { content = `[Video] ${m.videoMessage.caption ?? ""}`.trim(); messageType = "video"; }
+  else if (m.documentMessage) {
     content = `[Document] ${m.documentMessage.caption || m.documentMessage.fileName || ""}`.trim();
-  else if (m.audioMessage) content = m.audioMessage.ptt ? "[Voice message]" : "[Audio]";
-  else if (m.stickerMessage) content = "[Sticker]";
-  else if (m.locationMessage) content = `[Location] ${m.locationMessage.address ?? ""}`.trim();
-  else if (m.contactMessage?.displayName) content = `[Contact] ${m.contactMessage.displayName}`;
-  else if (m.pollCreationMessage?.name) content = `[Poll] ${m.pollCreationMessage.name}`;
-  else if (m.reactionMessage?.text) content = `[Reaction ${m.reactionMessage.text}]`;
+    messageType = "document";
+  }
+  else if (m.audioMessage) { content = m.audioMessage.ptt ? "[Voice message]" : "[Audio]"; messageType = "audio"; }
+  else if (m.stickerMessage) { content = "[Sticker]"; messageType = "sticker"; }
+  else if (m.locationMessage) { content = `[Location] ${m.locationMessage.address ?? ""}`.trim(); messageType = "location"; }
+  else if (m.contactMessage?.displayName) { content = `[Contact] ${m.contactMessage.displayName}`; messageType = "contact"; }
+  else if (m.pollCreationMessage?.name) { content = `[Poll] ${m.pollCreationMessage.name}`; messageType = "poll"; }
+  else if (m.reactionMessage?.text) { content = `[Reaction ${m.reactionMessage.text}]`; messageType = "reaction"; }
 
   if (!content) return null;
 
