@@ -8,8 +8,8 @@ successor to the abandoned `lharries/whatsapp-mcp` (6.1k stars). Goal: stars.
 Strategy in `BUILD_PLAN.md`; launch plan in `LAUNCH.md`.
 
 ## Current state: LIVE-TESTED END TO END. SECURITY-HARDENED. PUSHED. Near launch.
-- `origin/main` @ **7484a58** (repo: github.com/eeshsaxena/whatsapp-mcp-plus).
-- Deterministic suite green: **147 checks + MCP stdio smoke (52 tools)**, `npm test`.
+- `origin/main` @ **4bcc85d** (repo: github.com/eeshsaxena/whatsapp-mcp-plus).
+- Deterministic suite green: **150 checks + MCP stdio smoke (52 tools)**, `npm test`.
 - Working tree: clean except this HANDOFF (uncommitted by design).
 - A real device is **paired** (auth_info/ populated) as **+91 99252 38809**
   (WhatsApp name "Deepak"); `data/whatsapp.db` holds ~2115 real messages + ~14k
@@ -63,8 +63,30 @@ Strategy in `BUILD_PLAN.md`; launch plan in `LAUNCH.md`.
      intentionally NOT done (needs a native dep; breaks zero-native-deps design).
    - harden-test.mjs -> 28 checks; features-test pins WAMCP_PRIVACY=0.
 
-No known open security findings. Remaining non-security work: the consent/scopes
-+ setup-wizard feature (below) and untested-live groups/media/transcription.
+6. **4bcc85d — Deeper pen-test + pipeline optimization**
+   - Arbitrary file write FIXED: wrapped_card/whatsapp_rewind output paths confined
+     to data dir / send-file roots (assertWritablePath); was only NUL-checked.
+   - Predictable pseudonyms FIXED: aliases now use a random suffix
+     (waid-<10 hex>) instead of sequential — no alias-injection misrouting /
+     contact enumeration. (Alias regex in privacy.ts updated to match.)
+   - PERF: history sync batches each chunk in one transaction + cached prepared
+     statements (db.ts runInTransaction). Benchmark 10k inserts 26.5s -> 0.95s (~28x).
+   - harden-test -> 31 checks; suite 150.
+
+## Remaining pen-test findings (found, NOT yet fixed)
+- **[MED] Destructive ops lack confirm-to-send.** block_contact, group_leave,
+  delete_message, group_update_participants(remove) are gated only by mode + the
+  action-rate cap — not the two-step confirm that sends use. An injected agent in
+  `assisted` mode could block contacts / leave groups / delete messages. Fix:
+  route these through a guardedMutation() (stage->confirm) like guardedSend, or
+  put them behind a dedicated scope.
+- **[LOW/design] Allowlist "messaged-first" weakening.** isKnownRecipient() treats
+  anyone who has messaged the user as a valid send target, so a stranger who
+  texts first becomes reachable by an injected agent. Documented tradeoff; could
+  require explicit allowlist_add for first contact.
+
+Non-security work still open: consent/scopes + setup-wizard (below); live-test
+groups/media/transcription.
 
 ## Live testing performed this session (all cleaned up)
 - **Read/analytics over real 2115-msg history:** get_status/get_me/list_chats/
