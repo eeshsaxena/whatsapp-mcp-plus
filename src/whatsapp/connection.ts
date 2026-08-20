@@ -16,6 +16,7 @@ import {
   storeChat,
   storeContact,
   encodeRawMessage,
+  runInTransaction,
 } from "../db.ts";
 import { parseMessageForDb } from "./parse.ts";
 import { rememberMessage } from "./msgcache.ts";
@@ -123,26 +124,31 @@ export async function startWhatsAppConnection(logger: Logger): Promise<WhatsAppS
 
     if (events["messaging-history.set"]) {
       const { chats, contacts, messages } = events["messaging-history.set"];
-      for (const c of contacts) saveContact(c);
-      for (const chat of chats) {
-        storeChat({
-          jid: chat.id,
-          name: chat.name,
-          last_message_time: chat.conversationTimestamp
-            ? new Date(Number(chat.conversationTimestamp) * 1000)
-            : undefined,
-        });
-      }
       let stored = 0;
-      for (const msg of messages) {
-        rememberMessage(msg);
-        const parsed = parseMessageForDb(msg);
-        if (parsed) {
-          if (config.storeRaw) parsed.raw = encodeRawMessage(msg);
-          storeMessage(parsed);
-          stored++;
+      // Batch the whole history chunk into ONE transaction: SQLite commits once
+      // instead of per-row, turning thousands of individual inserts (a slow sync)
+      // into a single fast write. Prepared statements are cached in db.ts too.
+      runInTransaction(() => {
+        for (const c of contacts) saveContact(c);
+        for (const chat of chats) {
+          storeChat({
+            jid: chat.id,
+            name: chat.name,
+            last_message_time: chat.conversationTimestamp
+              ? new Date(Number(chat.conversationTimestamp) * 1000)
+              : undefined,
+          });
         }
-      }
+        for (const msg of messages) {
+          rememberMessage(msg);
+          const parsed = parseMessageForDb(msg);
+          if (parsed) {
+            if (config.storeRaw) parsed.raw = encodeRawMessage(msg);
+            storeMessage(parsed);
+            stored++;
+          }
+        }
+      });
       logger.info(`History sync: ${contacts.length} contacts, ${chats.length} chats, ${stored} messages.`);
     }
 

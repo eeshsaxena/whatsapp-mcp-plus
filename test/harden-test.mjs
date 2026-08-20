@@ -12,7 +12,7 @@ process.env.WAMCP_ACTIONS_PER_MINUTE = "5";
 
 const { initializeDatabase } = await import("../dist/db.js");
 const { scrubOutput, scrubText, dePseudonymizeArgs, contactLabel } = await import("../dist/privacy.js");
-const { assertNotSensitivePath, sanitizeFilename } = await import("../dist/security.js");
+const { assertNotSensitivePath, sanitizeFilename, assertWritablePath } = await import("../dist/security.js");
 const { assertActionRate } = await import("../dist/safety/index.js");
 
 initializeDatabase();
@@ -53,21 +53,26 @@ ok(scrubText("just a normal message") === "just a normal message", "normal text 
 // --- pseudonymization round-trip (reversible identifiers) ---
 {
   const out = scrubOutput({ jid: "919925238809@s.whatsapp.net", name: "Ravi", is_group: false });
-  ok(/^waid-\d+$/.test(out.jid), "jid pseudonymized to waid-N");
-  ok(/^waname-\d+$/.test(out.name), "name pseudonymized to waname-N");
+  ok(/^waid-[0-9a-f]+$/.test(out.jid), "jid pseudonymized to waid-N");
+  ok(/^waname-[0-9a-f]+$/.test(out.name), "name pseudonymized to waname-N");
   const back = dePseudonymizeArgs({ chat_jid: out.jid });
   ok(back.chat_jid === "919925238809@s.whatsapp.net", "alias reverses to real jid");
   const grp = scrubOutput({ jid: "120363000000000000@g.us" });
-  ok(/^wagrp-\d+$/.test(grp.jid), "group jid pseudonymized to wagrp-N");
+  ok(/^wagrp-[0-9a-f]+$/.test(grp.jid), "group jid pseudonymized to wagrp-N");
   ok(dePseudonymizeArgs({ chat_jid: grp.jid }).chat_jid === "120363000000000000@g.us", "group alias reverses");
-  ok(dePseudonymizeArgs({ chat_jid: "waid-99999" }).chat_jid === "waid-99999", "unknown alias left as-is (no false resolve)");
+  ok(dePseudonymizeArgs({ chat_jid: "waid-deadbeef99" }).chat_jid === "waid-deadbeef99", "unknown alias left as-is (no false resolve)");
 }
 
 // --- 12-digit phone inside a JID must alias (regression: was eaten by Aadhaar) ---
-ok(/^waid-\d+$/.test(scrubOutput({ jid: "911234567890@s.whatsapp.net" }).jid), "12-digit-JID aliases (not redacted-id)");
+ok(/^waid-[0-9a-f]+$/.test(scrubOutput({ jid: "911234567890@s.whatsapp.net" }).jid), "12-digit-JID aliases (not redacted-id)");
 
 // --- shareable-card names pseudonymized under privacy mode ---
-ok(/^waname-\d+$/.test(contactLabel("Carol", "555@s.whatsapp.net")), "card contact name aliased under privacy");
+ok(/^waname-[0-9a-f]+$/.test(contactLabel("Carol", "555@s.whatsapp.net")), "card contact name aliased under privacy");
+
+// --- arbitrary file write confinement (wrapped_card/rewind output paths) ---
+throws(() => assertWritablePath("/etc/cron.d/evil", [DATA]), "block write outside data dir");
+throws(() => assertWritablePath(path.join(DATA, "..", "..", "evil.svg"), [DATA]), "block write path traversal");
+nothrow(() => assertWritablePath(path.join(DATA, "rewind", "cover.svg"), [DATA]), "allow write inside data dir");
 
 // --- anti-runaway action rate cap (ban protection) ---
 nothrow(() => { for (let i = 0; i < 5; i++) assertActionRate("react_to_message"); }, "actions under cap (5) allowed");

@@ -1,6 +1,7 @@
 import { DatabaseSync } from "node:sqlite";
 import path from "node:path";
 import fs from "node:fs";
+import { randomBytes } from "node:crypto";
 import { proto, type WAMessage } from "baileys";
 import { config, ensureDirs } from "./config.ts";
 
@@ -151,9 +152,13 @@ export function getOrCreatePseudonym(kind: string, real: string): string {
     | { alias: string }
     | undefined;
   if (existing) return existing.alias;
-  const n =
-    (db.prepare(`SELECT COUNT(*) AS c FROM pseudonyms WHERE kind = ?`).get(kind) as { c: number }).c + 1;
-  const alias = `${kind}-${n}`;
+  // Random, unguessable suffix (not a sequential counter): stops an attacker
+  // from injecting a valid alias to misroute a send, and from enumerating how
+  // many contacts exist. Regenerate on the (astronomically unlikely) collision.
+  let alias = `${kind}-${randomBytes(5).toString("hex")}`;
+  while (db.prepare(`SELECT 1 FROM pseudonyms WHERE alias = ?`).get(alias)) {
+    alias = `${kind}-${randomBytes(5).toString("hex")}`;
+  }
   db.prepare(`INSERT OR IGNORE INTO pseudonyms (real, alias, kind) VALUES (?, ?, ?)`).run(real, alias, kind);
   return alias;
 }
@@ -220,17 +225,42 @@ function rowToChat(row: any): Chat {
 
 /* ------------------------------------------------------------------ writes */
 
+/**
+ * Prepared statements are cached (prepared once, reused) instead of re-prepared
+ * on every write. On the hot path — history sync stores thousands of messages —
+ * this removes ~3 prepare() calls per message. Pair with runInTransaction() to
+ * batch a whole sync into one commit for a large throughput win.
+ */
+let _chatUpsertStmt: any = null;
+let _chatTouchStmt: any = null;
+let _msgInsertStmt: any = null;
+let _contactUpsertStmt: any = null;
+
+/** Run `fn` inside a single DB transaction (one commit). Rolls back on throw. */
+export function runInTransaction<T>(fn: () => T): T {
+  const db = getDb();
+  db.exec("BEGIN");
+  try {
+    const result = fn();
+    db.exec("COMMIT");
+    return result;
+  } catch (e) {
+    try { db.exec("ROLLBACK"); } catch { /* ignore */ }
+    throw e;
+  }
+}
+
 export function storeChat(chat: Partial<Chat> & { jid: string }): void {
   const db = getDb();
   try {
-    const stmt = db.prepare(`
+    _chatUpsertStmt ??= db.prepare(`
       INSERT INTO chats (jid, name, last_message_time)
       VALUES (@jid, @name, @last_message_time)
       ON CONFLICT(jid) DO UPDATE SET
         name = COALESCE(excluded.name, name),
         last_message_time = COALESCE(excluded.last_message_time, last_message_time)
     `);
-    stmt.run({
+    _chatUpsertStmt.run({
       jid: chat.jid,
       name: chat.name ?? null,
       last_message_time:
@@ -249,12 +279,12 @@ export function storeMessage(message: Message): void {
   const db = getDb();
   try {
     storeChat({ jid: message.chat_jid, last_message_time: message.timestamp });
-    const stmt = db.prepare(`
+    _msgInsertStmt ??= db.prepare(`
       INSERT OR REPLACE INTO messages
         (id, chat_jid, sender, content, timestamp, is_from_me, message_type, media_type, raw)
       VALUES (@id, @chat_jid, @sender, @content, @timestamp, @is_from_me, @message_type, @media_type, @raw)
     `);
-    stmt.run({
+    _msgInsertStmt.run({
       id: message.id,
       chat_jid: message.chat_jid,
       sender: message.sender ?? null,
@@ -265,11 +295,12 @@ export function storeMessage(message: Message): void {
       media_type: message.media_type ?? null,
       raw: message.raw ?? null,
     });
-    db.prepare(`
+    _chatTouchStmt ??= db.prepare(`
       UPDATE chats
       SET last_message_time = MAX(COALESCE(last_message_time, '1970-01-01T00:00:00.000Z'), @ts)
       WHERE jid = @jid
-    `).run({ ts: message.timestamp.toISOString(), jid: message.chat_jid });
+    `);
+    _chatTouchStmt.run({ ts: message.timestamp.toISOString(), jid: message.chat_jid });
   } catch (e) {
     console.error("storeMessage error", e);
   }
@@ -283,14 +314,15 @@ export function storeContact(contact: {
 }): void {
   const db = getDb();
   try {
-    db.prepare(`
+    _contactUpsertStmt ??= db.prepare(`
       INSERT INTO contacts (jid, name, notify, phone_number)
       VALUES (@jid, @name, @notify, @phone_number)
       ON CONFLICT(jid) DO UPDATE SET
         name = COALESCE(excluded.name, name),
         notify = COALESCE(excluded.notify, notify),
         phone_number = COALESCE(excluded.phone_number, phone_number)
-    `).run({
+    `);
+    _contactUpsertStmt.run({
       jid: contact.jid,
       name: contact.name ?? null,
       notify: contact.notify ?? null,

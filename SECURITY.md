@@ -36,7 +36,9 @@ with this data. Privacy mode (below) reduces, but does not eliminate, what leave
 **Privacy mode (default ON, `WAMCP_PRIVACY`).** Before any result is returned to
 the model, it is scrubbed:
 - *Pseudonymized identifiers* — JIDs, phone numbers, emails and contact names
-  become stable local aliases (e.g. `waid-3`). The alias map lives only in the
+  become stable local aliases with an **unguessable random suffix** (e.g.
+  `waid-a1b2c3d4e5`), so a crafted message cannot inject a valid alias to misroute
+  a send, nor can contact counts be enumerated. The alias map lives only in the
   local DB; when the model passes an alias back as a tool argument it is reversed,
   so sends still reach the real contact. The model never sees real numbers/names.
 - *Redacted secrets* — structured secrets in message text are removed
@@ -60,6 +62,10 @@ the model, it is scrubbed:
 - **Media size cap:** downloads are bounded by `WAMCP_MAX_MEDIA_MB` (default
   100), rejecting oversized media (declared and actual) to prevent a malicious
   contact from filling disk / exhausting memory.
+- **Confined output paths:** the analytics cards (`wrapped_card`,
+  `whatsapp_rewind`) may only be written inside the data dir (or
+  `WAMCP_SEND_FILE_ROOTS`), so a crafted output path cannot traverse out to
+  overwrite or plant files elsewhere on disk.
 - **No shell:** the optional transcription command runs via `spawnSync` with an
   argument array (no shell), so message content cannot inject shell commands.
 - **No ReDoS:** the privacy-mode redaction patterns are linear (no lookahead

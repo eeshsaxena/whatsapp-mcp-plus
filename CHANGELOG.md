@@ -43,7 +43,15 @@ government IDs, bank codes, API keys, OTP codes) are redacted.
 - Shareable Wrapped/Rewind SVG cards pseudonymize contact names under privacy
   mode, so a posted card doesn't leak your contacts.
 - `data/` + `auth_info/` locked to `0700` and DB files to `0600` (POSIX).
-- Added `test/harden-test.mjs` (28 checks) covering the above.
+- Analytics card output paths (`wrapped_card`/`whatsapp_rewind`) confined to the
+  data dir / `WAMCP_SEND_FILE_ROOTS` — closes an arbitrary-file-write path.
+- Pseudonym aliases use an unguessable random suffix (were sequential), blocking
+  alias-injection misrouting and contact-count enumeration.
+- Added `test/harden-test.mjs` (31 checks) covering the above.
+
+**Performance:** history sync batches each chunk into a single transaction and
+reuses cached prepared statements — ~28x faster bulk message inserts (10k rows:
+~26.5s -> ~0.95s in a local benchmark).
 
 **Infra:** zero native deps (node:sqlite), raw proto persistence for media/forward,
 npx + Docker install, GitHub Actions CI, demo scripts, 75 tests + MCP smoke.

@@ -19,8 +19,8 @@ import { getOrCreatePseudonym, resolvePseudonym } from "./db.ts";
  */
 
 // ---- reversible alias token shape (must round-trip through de-pseudonymize) ----
-const ALIAS_RE = /\b(?:waid|wagrp|waph|waem|waname)-\d+\b/g;
-const ALIAS_EXACT = /^(?:waid|wagrp|waph|waem|waname)-\d+$/;
+const ALIAS_RE = /\b(?:waid|wagrp|waph|waem|waname)-[0-9a-f]{6,}\b/g;
+const ALIAS_EXACT = /^(?:waid|wagrp|waph|waem|waname)-[0-9a-f]{6,}$/;
 
 // ---- structured-secret detectors (redacted, not reversible) ----
 function luhnValid(digits: string): boolean {

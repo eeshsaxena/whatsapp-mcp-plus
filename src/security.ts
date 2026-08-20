@@ -63,6 +63,30 @@ export function assertNotSensitivePath(target: string, extraDenyDirs: string[] =
 }
 
 /**
+ * Confine a file/dir we are about to WRITE to (analytics cards) so a
+ * prompt-injected agent cannot use a traversal path to overwrite or plant files
+ * anywhere on disk. The target must resolve inside one of `allowedRoots`
+ * (typically the data dir plus any configured send-file roots), must not be a
+ * sensitive path, and must contain no NUL byte.
+ */
+export function assertWritablePath(target: string, allowedRoots: string[]): void {
+  assertNoNullByte(target, "output path");
+  assertNotSensitivePath(target);
+  const resolved = path.resolve(target);
+  const ok = allowedRoots.some((root) => {
+    const base = path.resolve(root);
+    const rel = path.relative(base, resolved);
+    return rel === "" || (!rel.startsWith("..") && !path.isAbsolute(rel));
+  });
+  if (!ok) {
+    throw new Error(
+      `Blocked: output path "${target}" is outside the data directory ` +
+        `(and WAMCP_SEND_FILE_ROOTS). This prevents writing files to arbitrary locations.`,
+    );
+  }
+}
+
+/**
  * Assert that `target` resolves inside one of `roots`. Used to optionally
  * confine which directories files may be SENT from (anti-exfiltration): a
  * prompt-injected agent then cannot send ~/.ssh/id_rsa to a contact.
