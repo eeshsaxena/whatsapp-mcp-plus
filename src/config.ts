@@ -57,6 +57,8 @@ export interface Config {
    * (cards, gov IDs, API keys, OTP codes). Disable with WAMCP_PRIVACY=0.
    */
   privacy: boolean;
+  /** Max bytes to accept when downloading media (anti disk/memory DoS). */
+  maxMediaBytes: number;
   /**
    * If non-empty, files may only be SENT from these directories. Anti-exfiltration
    * guard: a prompt-injected agent then cannot send e.g. ~/.ssh/id_rsa. Empty = no
@@ -118,6 +120,7 @@ export const config: Config = {
   storeRaw: envBool("WAMCP_STORE_RAW", true),
   syncFullHistory: envBool("WAMCP_SYNC_FULL_HISTORY", true),
   privacy: envBool("WAMCP_PRIVACY", true),
+  maxMediaBytes: Math.max(1, envInt("WAMCP_MAX_MEDIA_MB", 100)) * 1024 * 1024,
   sendFileRoots: (process.env.WAMCP_SEND_FILE_ROOTS || "")
     .split(",").map((s) => s.trim()).filter(Boolean),
 };

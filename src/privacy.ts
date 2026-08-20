@@ -56,8 +56,11 @@ function redactSecrets(text: string): string {
   s = s.replace(/\b\d{4}\s?\d{4}\s?\d{4}\b/g, "[redacted-id]");            // India Aadhaar (12 digits)
   s = s.replace(/\b\d{3}-\d{2}-\d{4}\b/g, "[redacted-ssn]");              // US SSN
   s = s.replace(/\b[A-Z]{4}0[A-Z0-9]{6}\b/g, "[redacted-ifsc]");          // India IFSC
-  // Generic long high-entropy token (mixed letters+digits, >=32 chars).
-  s = s.replace(/\b(?=[A-Za-z0-9_-]*[A-Za-z])(?=[A-Za-z0-9_-]*\d)[A-Za-z0-9_-]{32,}\b/g, "[redacted-token]");
+  // Generic long high-entropy token (mixed letters+digits, >=32 chars). Matched
+  // in a single linear pass (no lookaheads) so crafted input cannot trigger
+  // catastrophic backtracking / ReDoS; the mixed-charset check is in the callback.
+  s = s.replace(/[A-Za-z0-9_-]{32,}/g, (m) =>
+    /[A-Za-z]/.test(m) && /[0-9]/.test(m) ? "[redacted-token]" : m);
   return s;
 }
 

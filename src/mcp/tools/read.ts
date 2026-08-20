@@ -72,7 +72,9 @@ export function registerReadTools(server: McpServer): void {
     { chat_jid: z.string().describe("Chat JID to fetch the most recent message from") },
     safeHandler(async ({ chat_jid }: any) => {
       const msg = getLastInteraction(chat_jid);
-      return jsonResult(msg ? formatDbMessageForJson(msg) : null);
+      if (!msg) return jsonResult(null);
+      const injection = annotateForInjection([msg.content]);
+      return jsonResult({ warning: injection.warning, message: formatDbMessageForJson(msg) });
     }),
   );
 

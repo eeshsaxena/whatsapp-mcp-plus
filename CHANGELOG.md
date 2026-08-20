@@ -29,6 +29,16 @@ identifiers (JIDs, phone numbers, emails, contact names) are pseudonymized to
 reversible local aliases, and structured secrets in message text (payment cards,
 government IDs, bank codes, API keys, OTP codes) are redacted.
 
+**Security hardening (pen-test pass):**
+- Always-on send-file denylist blocks credential/secret files (`.env`, SSH keys,
+  `*.pem`, `.aws`/`.ssh`/`auth_info/`, the message DB) even with no
+  `WAMCP_SEND_FILE_ROOTS` set — closes a default-open exfiltration path.
+- Media downloads bounded by `WAMCP_MAX_MEDIA_MB` (default 100) against
+  disk/memory DoS.
+- Privacy redaction regexes made linear (ReDoS-safe); injection warning banner
+  extended to `get_last_interaction`.
+- Added `test/harden-test.mjs` (25 checks) covering the above.
+
 **Infra:** zero native deps (node:sqlite), raw proto persistence for media/forward,
 npx + Docker install, GitHub Actions CI, demo scripts, 75 tests + MCP smoke.
 

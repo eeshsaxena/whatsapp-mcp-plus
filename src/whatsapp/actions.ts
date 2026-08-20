@@ -9,7 +9,7 @@ import path from "node:path";
 import { getConnectionState } from "./connection.ts";
 import { waCall, assertGroupJid, isValidReaction } from "./guard.ts";
 import { config } from "../config.ts";
-import { assertPathWithinRoots } from "../security.ts";
+import { assertPathWithinRoots, assertNotSensitivePath } from "../security.ts";
 import { rememberMessage } from "./msgcache.ts";
 import { parseMessageForDb } from "./parse.ts";
 import { storeMessage, encodeRawMessage } from "../db.ts";
@@ -35,6 +35,10 @@ function persistSent(res: proto.IWebMessageInfo | undefined): void {
 }
 
 function assertSendableFile(filePath: string): void {
+  // Always-on denylist (credentials/keys/auth dirs) first, then the optional
+  // roots allowlist. The denylist blocks secret exfiltration even when no roots
+  // are configured (the permissive default).
+  assertNotSensitivePath(filePath, [config.authDir]);
   assertPathWithinRoots(filePath, config.sendFileRoots);
   if (!fs.existsSync(filePath)) throw new Error(`File not found: ${filePath}`);
 }

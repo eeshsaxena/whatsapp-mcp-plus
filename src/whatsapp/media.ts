@@ -27,12 +27,29 @@ export async function downloadMessageMedia(
     );
   }
   const mediaType = detectMediaType(msg) ?? "file";
+
+  // Anti-DoS: reject oversized media. Fail fast on the sender-declared length
+  // before spending bandwidth, then hard-check the actual bytes.
+  const mm: any = msg.message ?? {};
+  const declared = Number(
+    (mm.imageMessage ?? mm.videoMessage ?? mm.audioMessage ?? mm.documentMessage ?? mm.stickerMessage)
+      ?.fileLength ?? 0,
+  );
+  const capMb = Math.round(config.maxMediaBytes / (1024 * 1024));
+  if (declared && declared > config.maxMediaBytes) {
+    throw new Error(`Media is ~${Math.round(declared / 1048576)}MB, over the ${capMb}MB limit (WAMCP_MAX_MEDIA_MB).`);
+  }
+
   const buffer = (await waCall("download_media", () => downloadMediaMessage(
     msg,
     "buffer",
     {},
     { logger: logger as any, reuploadRequest: (sock as any)?.updateMediaMessage },
   ), 90_000)) as Buffer;
+
+  if (buffer.length > config.maxMediaBytes) {
+    throw new Error(`Media is ${(buffer.length / 1048576).toFixed(1)}MB, over the ${capMb}MB limit (WAMCP_MAX_MEDIA_MB).`);
+  }
 
   const mediaDir = path.join(config.dataDir, "media");
   if (!fs.existsSync(mediaDir)) fs.mkdirSync(mediaDir, { recursive: true });

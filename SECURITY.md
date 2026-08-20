@@ -48,11 +48,19 @@ the model, it is scrubbed:
 - **Path traversal:** WhatsApp message ids (which a sender can craft) are
   sanitized before being used in media filenames, so a crafted id cannot write
   outside the media directory. Output paths are rejected if they contain a NUL byte.
-- **Exfiltration guard:** set `WAMCP_SEND_FILE_ROOTS` to a comma-separated list of
-  directories to restrict which files may be *sent*. With it set, a prompt-injected
-  agent cannot send `~/.ssh/id_rsa` or other sensitive files to a contact.
+- **Secret-exfiltration denylist (always on):** `send_file` refuses obvious
+  credential/secret files — `.env`, SSH/PGP keys, `*.pem/*.key`, `.aws`/`.ssh`/
+  `.gnupg` dirs, `auth_info/`, and the message DB — regardless of configuration,
+  so a prompt-injected agent cannot exfiltrate them even when no roots are set.
+- **Exfiltration allowlist (optional):** set `WAMCP_SEND_FILE_ROOTS` to confine
+  sends to specific directories on top of the always-on denylist.
+- **Media size cap:** downloads are bounded by `WAMCP_MAX_MEDIA_MB` (default
+  100), rejecting oversized media (declared and actual) to prevent a malicious
+  contact from filling disk / exhausting memory.
 - **No shell:** the optional transcription command runs via `spawnSync` with an
   argument array (no shell), so message content cannot inject shell commands.
+- **No ReDoS:** the privacy-mode redaction patterns are linear (no lookahead
+  backtracking), verified fast on 120 KB of crafted input.
 - **Parameterized SQL** throughout; `LIKE` patterns escape user wildcards.
 
 **Account safety.** This uses an unofficial WhatsApp client (Baileys); misuse can
