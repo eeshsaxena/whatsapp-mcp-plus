@@ -10,6 +10,29 @@ import { getConnectionState } from "./connection.ts";
 import { waCall, assertGroupJid, isValidReaction } from "./guard.ts";
 import { config } from "../config.ts";
 import { assertPathWithinRoots } from "../security.ts";
+import { rememberMessage } from "./msgcache.ts";
+import { parseMessageForDb } from "./parse.ts";
+import { storeMessage, encodeRawMessage } from "../db.ts";
+
+/**
+ * Persist a message WE just sent. Baileys does not emit messages.upsert for our
+ * own outgoing messages, so without this a sent message never lands in the DB /
+ * cache — it wouldn't show up in list_messages and couldn't be edited or deleted
+ * by id. Best-effort: a persistence hiccup must never fail the actual send.
+ */
+function persistSent(res: proto.IWebMessageInfo | undefined): void {
+  if (!res?.key?.id) return;
+  try {
+    rememberMessage(res as any);
+    const parsed = parseMessageForDb(res as any);
+    if (parsed) {
+      if (config.storeRaw) parsed.raw = encodeRawMessage(res as any);
+      storeMessage(parsed);
+    }
+  } catch {
+    /* ignore: never let bookkeeping break a successful send */
+  }
+}
 
 function assertSendableFile(filePath: string): void {
   assertPathWithinRoots(filePath, config.sendFileRoots);
@@ -68,6 +91,7 @@ export async function sendText(
   assertSock(sock);
   const res = await waCall("send_message", () =>
     sock.sendMessage(jidNormalizedUser(jid), { text }, quoted ? { quoted } : undefined), SEND_TIMEOUT);
+  persistSent(res);
   return res?.key.id ?? undefined;
 }
 
@@ -94,6 +118,7 @@ export async function sendMediaFile(
   else content = { document: buf, mimetype, fileName, caption };
 
   const res = await waCall("send_file", () => sock.sendMessage(jidNormalizedUser(jid), content), MEDIA_TIMEOUT);
+  persistSent(res);
   return res?.key.id ?? undefined;
 }
 
@@ -110,6 +135,7 @@ export async function sendVoiceNote(
     ptt: true,
     mimetype: "audio/ogg; codecs=opus",
   }), MEDIA_TIMEOUT);
+  persistSent(res);
   return res?.key.id ?? undefined;
 }
 

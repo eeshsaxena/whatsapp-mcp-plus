@@ -27,6 +27,15 @@ confirm-to-send, prompt-injection guard.
 **Infra:** zero native deps (node:sqlite), raw proto persistence for media/forward,
 npx + Docker install, GitHub Actions CI, demo scripts, 75 tests + MCP smoke.
 
-**Fixes:** QR code routed to stderr (was corrupting the MCP stdio transport).
+**Fixes:**
+- QR code routed to stderr (was corrupting the MCP stdio transport).
+- Sync full message history on first login (`syncFullHistory`, opt-out via
+  `WAMCP_SYNC_FULL_HISTORY=0`) — a fresh pairing previously synced only the
+  contact/chat list, leaving the analytics tools empty until new messages arrived.
+- Resolve sender names for WhatsApp's privacy `@lid` identifiers by capturing
+  `pushName` from live messages and cross-linking the lid/phone contact forms,
+  so analytics show names instead of raw numbers.
+- Persist our own sent messages so they appear in `list_messages` and can be
+  edited/deleted by id (Baileys emits no upsert for outgoing messages).
 
 Derived from whatsapp-mcp-ts (ISC) and whatsapp-mcp (MIT); see NOTICE.

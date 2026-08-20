@@ -42,6 +42,14 @@ export interface Config {
   /** Persist the raw encoded message proto so media/forward work for old messages. */
   storeRaw: boolean;
   /**
+   * Request the full message history from WhatsApp on first login. Without this,
+   * a freshly linked device only receives the contact + chat list (no message
+   * bodies), leaving the analytics tools (wrapped, chat_stats, leaderboard,
+   * rewind) empty until new messages arrive live. Must be set before the initial
+   * pairing to take effect. Set via WAMCP_SYNC_FULL_HISTORY (default on).
+   */
+  syncFullHistory: boolean;
+  /**
    * If non-empty, files may only be SENT from these directories. Anti-exfiltration
    * guard: a prompt-injected agent then cannot send e.g. ~/.ssh/id_rsa. Empty = no
    * restriction. Set via WAMCP_SEND_FILE_ROOTS (comma-separated).
@@ -100,6 +108,7 @@ export const config: Config = {
   },
   transcriptionCmd: process.env.WAMCP_TRANSCRIPTION_CMD || null,
   storeRaw: envBool("WAMCP_STORE_RAW", true),
+  syncFullHistory: envBool("WAMCP_SYNC_FULL_HISTORY", true),
   sendFileRoots: (process.env.WAMCP_SEND_FILE_ROOTS || "")
     .split(",").map((s) => s.trim()).filter(Boolean),
 };
