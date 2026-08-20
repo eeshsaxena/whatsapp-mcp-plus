@@ -40,8 +40,18 @@ export function parseMessageForDb(msg: WAMessage): DbMessage | null {
   else if (m.audioMessage) { content = m.audioMessage.ptt ? "[Voice message]" : "[Audio]"; messageType = "audio"; }
   else if (m.stickerMessage) { content = "[Sticker]"; messageType = "sticker"; }
   else if (m.locationMessage) { content = `[Location] ${m.locationMessage.address ?? ""}`.trim(); messageType = "location"; }
-  else if (m.contactMessage?.displayName) { content = `[Contact] ${m.contactMessage.displayName}`; messageType = "contact"; }
-  else if (m.pollCreationMessage?.name) { content = `[Poll] ${m.pollCreationMessage.name}`; messageType = "poll"; }
+  else if (m.contactMessage || m.contactsArrayMessage) {
+    const cname = m.contactMessage?.displayName || m.contactsArrayMessage?.displayName || "";
+    content = `[Contact] ${cname}`.trim();
+    messageType = "contact";
+  }
+  // Polls arrive as pollCreationMessage or the newer V2/V3 variants depending on
+  // the recipient's device; handle all three so sent polls are captured too.
+  else if (m.pollCreationMessage?.name || m.pollCreationMessageV2?.name || m.pollCreationMessageV3?.name) {
+    const poll = m.pollCreationMessage ?? m.pollCreationMessageV2 ?? m.pollCreationMessageV3;
+    content = `[Poll] ${poll?.name ?? ""}`.trim();
+    messageType = "poll";
+  }
   else if (m.reactionMessage?.text) { content = `[Reaction ${m.reactionMessage.text}]`; messageType = "reaction"; }
 
   if (!content) return null;

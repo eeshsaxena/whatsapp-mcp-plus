@@ -35,7 +35,10 @@ npx + Docker install, GitHub Actions CI, demo scripts, 75 tests + MCP smoke.
 - Resolve sender names for WhatsApp's privacy `@lid` identifiers by capturing
   `pushName` from live messages and cross-linking the lid/phone contact forms,
   so analytics show names instead of raw numbers.
-- Persist our own sent messages so they appear in `list_messages` and can be
-  edited/deleted by id (Baileys emits no upsert for outgoing messages).
+- Persist our own sent messages (text, media, voice, location, poll, contact,
+  forward) so they appear in `list_messages` and can be edited/deleted by id
+  (Baileys emits no upsert for outgoing messages).
+- Parse poll (V2/V3) and contact / contacts-array messages, so sent polls and
+  contact cards are captured instead of silently dropped.
 
 Derived from whatsapp-mcp-ts (ISC) and whatsapp-mcp (MIT); see NOTICE.

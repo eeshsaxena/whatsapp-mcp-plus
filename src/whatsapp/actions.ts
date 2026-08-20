@@ -188,6 +188,7 @@ export async function forwardMessage(
   assertSock(sock);
   const res = await waCall("forward_message", () =>
     sock.sendMessage(jidNormalizedUser(toJid), { forward: original }), MEDIA_TIMEOUT);
+  persistSent(res);
   return res?.key.id ?? undefined;
 }
 
@@ -222,6 +223,7 @@ export async function sendLocation(
   const res = await waCall("send_location", () => sock.sendMessage(jidNormalizedUser(jid), {
     location: { degreesLatitude: latitude, degreesLongitude: longitude, name, address },
   }), SEND_TIMEOUT);
+  persistSent(res);
   return res?.key.id ?? undefined;
 }
 
@@ -237,6 +239,7 @@ export async function sendPoll(
   const res = await waCall("send_poll", () => sock.sendMessage(jidNormalizedUser(jid), {
     poll: { name, values, selectableCount },
   }), SEND_TIMEOUT);
+  persistSent(res);
   return res?.key.id ?? undefined;
 }
 
@@ -256,8 +259,9 @@ export async function sendContactCard(
     `TEL;type=CELL;type=VOICE;waid=${waid}:${phoneNumber}\n` +
     "END:VCARD";
   const res = await waCall("send_contact", () => sock.sendMessage(jidNormalizedUser(jid), {
-    contacts: { displayName, contacts: [{ vcard }] },
+    contacts: { displayName, contacts: [{ displayName, vcard }] },
   }), SEND_TIMEOUT);
+  persistSent(res);
   return res?.key.id ?? undefined;
 }
 
