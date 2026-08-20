@@ -8,8 +8,8 @@ successor to the abandoned `lharries/whatsapp-mcp` (6.1k stars). Goal: stars.
 Strategy in `BUILD_PLAN.md`; launch plan in `LAUNCH.md`.
 
 ## Current state: LIVE-TESTED END TO END. SECURITY-HARDENED. PUSHED. Near launch.
-- `origin/main` @ **3ccbb9c** (repo: github.com/eeshsaxena/whatsapp-mcp-plus).
-- Deterministic suite green: **144 checks + MCP stdio smoke (52 tools)**, `npm test`.
+- `origin/main` @ **7484a58** (repo: github.com/eeshsaxena/whatsapp-mcp-plus).
+- Deterministic suite green: **147 checks + MCP stdio smoke (52 tools)**, `npm test`.
 - Working tree: clean except this HANDOFF (uncommitted by design).
 - A real device is **paired** (auth_info/ populated) as **+91 99252 38809**
   (WhatsApp name "Deepak"); `data/whatsapp.db` holds ~2115 real messages + ~14k
@@ -53,10 +53,18 @@ Strategy in `BUILD_PLAN.md`; launch plan in `LAUNCH.md`.
    - Privacy redaction regexes made linear (ReDoS-safe, 120KB ~6ms); injection
      warning banner extended to get_last_interaction.
    - New `test/harden-test.mjs` (25 checks), wired into `npm test`.
-   - Pen-test findings still OPEN (low sev): react/edit/mark_read/presence bypass
-     rate limiting (only guardedSend sends are limited) — ban-risk if the agent is
-     compromised; consider a light rate check. At-rest plaintext DB/auth and
-     shareable-SVG names embedding real PII are documented, not code-fixed.
+5. **7484a58 — Close remaining pen-test findings**
+   - Ban risk FIXED: global per-minute cap on ALL write actions
+     (`WAMCP_ACTIONS_PER_MINUTE`, default 60) in `assertMutationsAllowed`, so
+     react/edit/delete/mark_read/presence can't be looped.
+   - Privacy FIXED: Wrapped/Rewind SVG cards pseudonymize contact names under
+     privacy mode (was leaking real names into a shareable artifact).
+   - At-rest: `data/`+`auth_info/` 0700, DB files 0600 (POSIX). Encryption-at-rest
+     intentionally NOT done (needs a native dep; breaks zero-native-deps design).
+   - harden-test.mjs -> 28 checks; features-test pins WAMCP_PRIVACY=0.
+
+No known open security findings. Remaining non-security work: the consent/scopes
++ setup-wizard feature (below) and untested-live groups/media/transcription.
 
 ## Live testing performed this session (all cleaned up)
 - **Read/analytics over real 2115-msg history:** get_status/get_me/list_chats/
