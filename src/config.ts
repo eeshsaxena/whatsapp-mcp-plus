@@ -50,6 +50,14 @@ export interface Config {
    */
   syncFullHistory: boolean;
   /**
+   * Privacy mode (default ON). Before any tool result is returned to the MCP
+   * client (and thus the LLM provider's cloud), pseudonymize identifiers (JIDs,
+   * phone numbers, emails, contact names -> stable local aliases, reversed when
+   * the model passes them back) and redact structured secrets in message content
+   * (cards, gov IDs, API keys, OTP codes). Disable with WAMCP_PRIVACY=0.
+   */
+  privacy: boolean;
+  /**
    * If non-empty, files may only be SENT from these directories. Anti-exfiltration
    * guard: a prompt-injected agent then cannot send e.g. ~/.ssh/id_rsa. Empty = no
    * restriction. Set via WAMCP_SEND_FILE_ROOTS (comma-separated).
@@ -109,6 +117,7 @@ export const config: Config = {
   transcriptionCmd: process.env.WAMCP_TRANSCRIPTION_CMD || null,
   storeRaw: envBool("WAMCP_STORE_RAW", true),
   syncFullHistory: envBool("WAMCP_SYNC_FULL_HISTORY", true),
+  privacy: envBool("WAMCP_PRIVACY", true),
   sendFileRoots: (process.env.WAMCP_SEND_FILE_ROOTS || "")
     .split(",").map((s) => s.trim()).filter(Boolean),
 };

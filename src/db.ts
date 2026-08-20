@@ -107,6 +107,18 @@ export function initializeDatabase(): DatabaseSync {
     );
   `);
 
+  // Reversible pseudonym map for privacy mode: real identifier <-> stable alias.
+  // Lets us send aliases (not real JIDs/phones/names) to the LLM and reverse
+  // them when the model passes an alias back as a tool argument.
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS pseudonyms (
+      real TEXT PRIMARY KEY,
+      alias TEXT NOT NULL,
+      kind TEXT NOT NULL
+    );
+  `);
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_pseudonyms_alias ON pseudonyms (alias);`);
+
   db.exec(`CREATE INDEX IF NOT EXISTS idx_messages_timestamp ON messages (timestamp);`);
   db.exec(`CREATE INDEX IF NOT EXISTS idx_messages_chat_jid ON messages (chat_jid);`);
   db.exec(`CREATE INDEX IF NOT EXISTS idx_messages_sender ON messages (sender);`);
@@ -123,6 +135,29 @@ export function initializeDatabase(): DatabaseSync {
   }
 
   return db;
+}
+
+/** Return the stable alias for a real identifier, creating one on first sight. */
+export function getOrCreatePseudonym(kind: string, real: string): string {
+  const db = getDb();
+  const existing = db.prepare(`SELECT alias FROM pseudonyms WHERE real = ?`).get(real) as
+    | { alias: string }
+    | undefined;
+  if (existing) return existing.alias;
+  const n =
+    (db.prepare(`SELECT COUNT(*) AS c FROM pseudonyms WHERE kind = ?`).get(kind) as { c: number }).c + 1;
+  const alias = `${kind}-${n}`;
+  db.prepare(`INSERT OR IGNORE INTO pseudonyms (real, alias, kind) VALUES (?, ?, ?)`).run(real, alias, kind);
+  return alias;
+}
+
+/** Reverse an alias back to its real identifier, or null if unknown. */
+export function resolvePseudonym(alias: string): string | null {
+  const db = getDb();
+  const row = db.prepare(`SELECT real FROM pseudonyms WHERE alias = ?`).get(alias) as
+    | { real: string }
+    | undefined;
+  return row?.real ?? null;
 }
 
 /**

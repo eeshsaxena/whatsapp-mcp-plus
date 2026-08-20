@@ -24,6 +24,11 @@ a maintained successor to the abandoned `lharries/whatsapp-mcp`.
 **Safety (safe by default):** read-only mode, contact allowlist, rate limiting,
 confirm-to-send, prompt-injection guard.
 
+**Privacy (default ON, `WAMCP_PRIVACY`):** before results reach the LLM,
+identifiers (JIDs, phone numbers, emails, contact names) are pseudonymized to
+reversible local aliases, and structured secrets in message text (payment cards,
+government IDs, bank codes, API keys, OTP codes) are redacted.
+
 **Infra:** zero native deps (node:sqlite), raw proto persistence for media/forward,
 npx + Docker install, GitHub Actions CI, demo scripts, 75 tests + MCP smoke.
 

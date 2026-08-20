@@ -21,7 +21,28 @@ make the agent exfiltrate your data or send messages on your behalf. Mitigations
 **Local data.** All messages are stored in a local SQLite DB and never leave your
 machine except through an explicit tool call by your agent. Pairing credentials
 live in `auth_info/` (created with `0700` where the OS honors it) and are
-git-ignored. Do not commit `data/` or `auth_info/`.
+git-ignored. Do not commit `data/` or `auth_info/`. The DB, logs, and downloaded
+media are stored in plaintext, so keep the project out of a cloud-synced folder
+(OneDrive/Dropbox/Drive) and off shared machines.
+
+**Data goes to your LLM.** Reading is not the same as private: any tool result
+(messages, contacts, analytics) is returned to whatever MCP client / LLM provider
+you connect, and is processed in their cloud. Only connect a provider you trust
+with this data. Privacy mode (below) reduces, but does not eliminate, what leaves.
+
+**Privacy mode (default ON, `WAMCP_PRIVACY`).** Before any result is returned to
+the model, it is scrubbed:
+- *Pseudonymized identifiers* — JIDs, phone numbers, emails and contact names
+  become stable local aliases (e.g. `waid-3`). The alias map lives only in the
+  local DB; when the model passes an alias back as a tool argument it is reversed,
+  so sends still reach the real contact. The model never sees real numbers/names.
+- *Redacted secrets* — structured secrets in message text are removed
+  irreversibly: payment cards (Luhn), government IDs (Aadhaar/PAN/SSN), bank codes
+  (IFSC), API keys/tokens, and OTP/2FA codes.
+- *Limits* — ordinary message text stays readable (so the model can still
+  summarize/reply), and pattern matching cannot catch *semantic* sensitivity
+  (e.g. a health disclosure). For that, read with metadata-only intent or avoid
+  syncing those chats. Set `WAMCP_PRIVACY=0` to send real values.
 
 **Filesystem hardening.**
 - **Path traversal:** WhatsApp message ids (which a sender can craft) are
