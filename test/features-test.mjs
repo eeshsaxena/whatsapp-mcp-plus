@@ -8,6 +8,9 @@ import assert from "node:assert";
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "wamcp-feat-"));
 process.env.WAMCP_DATA_DIR = tmp;
 process.env.WAMCP_AUTH_DIR = path.join(tmp, "auth");
+// This suite checks card/rewind rendering fidelity with real names; privacy-mode
+// name pseudonymization is covered separately in harden-test.
+process.env.WAMCP_PRIVACY = "0";
 const db = await import("../dist/db.js");
 const { renderWrappedSVG } = await import("../dist/analytics/card.js");
 const { renderRewindCards } = await import("../dist/analytics/rewind.js");

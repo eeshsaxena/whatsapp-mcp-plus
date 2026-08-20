@@ -8,10 +8,12 @@ const DATA = path.join(os.tmpdir(), `wamcp-harden-${process.pid}`);
 process.env.WAMCP_DATA_DIR = DATA;
 process.env.WAMCP_AUTH_DIR = path.join(DATA, "auth_info");
 process.env.WAMCP_PRIVACY = "true";
+process.env.WAMCP_ACTIONS_PER_MINUTE = "5";
 
 const { initializeDatabase } = await import("../dist/db.js");
-const { scrubOutput, scrubText, dePseudonymizeArgs } = await import("../dist/privacy.js");
+const { scrubOutput, scrubText, dePseudonymizeArgs, contactLabel } = await import("../dist/privacy.js");
 const { assertNotSensitivePath, sanitizeFilename } = await import("../dist/security.js");
+const { assertActionRate } = await import("../dist/safety/index.js");
 
 initializeDatabase();
 
@@ -63,6 +65,13 @@ ok(scrubText("just a normal message") === "just a normal message", "normal text 
 
 // --- 12-digit phone inside a JID must alias (regression: was eaten by Aadhaar) ---
 ok(/^waid-\d+$/.test(scrubOutput({ jid: "911234567890@s.whatsapp.net" }).jid), "12-digit-JID aliases (not redacted-id)");
+
+// --- shareable-card names pseudonymized under privacy mode ---
+ok(/^waname-\d+$/.test(contactLabel("Carol", "555@s.whatsapp.net")), "card contact name aliased under privacy");
+
+// --- anti-runaway action rate cap (ban protection) ---
+nothrow(() => { for (let i = 0; i < 5; i++) assertActionRate("react_to_message"); }, "actions under cap (5) allowed");
+throws(() => assertActionRate("react_to_message"), "action over per-minute cap blocked");
 
 // --- filename sanitization (path traversal) ---
 ok(!sanitizeFilename("../../etc/passwd").includes("/"), "sanitizeFilename strips slashes");

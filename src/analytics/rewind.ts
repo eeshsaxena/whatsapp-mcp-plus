@@ -1,4 +1,5 @@
 import type { WrappedStats, ResponseLeaderEntry } from "../db.ts";
+import { contactLabel } from "../privacy.ts";
 
 /**
  * "WhatsApp Rewind" — premium, Spotify-Wrapped-style story cards (1080x1920),
@@ -126,7 +127,7 @@ function topPeopleCard(s: WrappedStats): string {
   const rows = people.map((c, i) => {
     const y = top + i * rowH;
     const w = Math.max(28, Math.round((c.count / max) * barW));
-    const name = esc((c.name ?? c.jid.split("@")[0]).slice(0, 22));
+    const name = esc(contactLabel(c.name, c.jid).slice(0, 22));
     return `
       <text x="${x}" y="${y}" fill="${INK}" font-size="50" font-weight="800">${i + 1}. ${name}</text>
       <text x="${x + barW}" y="${y}" fill="${INK2}" font-size="44" font-weight="700" text-anchor="end">${fmt(c.count)}</text>
@@ -211,7 +212,7 @@ function leaderboardCard(board: { fastest: ResponseLeaderEntry[]; slowest: Respo
   const slow = board.slowest.slice(0, 3);
   const rows = (arr: ResponseLeaderEntry[], y0: number, color: string) => arr.map((e, i) => {
     const y = y0 + i * 118;
-    const name = esc((e.name ?? e.jid.split("@")[0]).slice(0, 20));
+    const name = esc(contactLabel(e.name, e.jid).slice(0, 20));
     return `<text x="128" y="${y}" fill="${INK}" font-size="50" font-weight="800">${i + 1}. ${name}</text>
       <text x="${W - 128}" y="${y}" fill="${color}" font-size="50" font-weight="900" text-anchor="end">${humanDur(e.avgMyResponseSec)}</text>`;
   }).join("");

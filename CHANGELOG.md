@@ -37,7 +37,13 @@ government IDs, bank codes, API keys, OTP codes) are redacted.
   disk/memory DoS.
 - Privacy redaction regexes made linear (ReDoS-safe); injection warning banner
   extended to `get_last_interaction`.
-- Added `test/harden-test.mjs` (25 checks) covering the above.
+- Global per-minute cap on ALL write actions (`WAMCP_ACTIONS_PER_MINUTE`,
+  default 60) — reactions/edits/deletes/read-receipts/presence were previously
+  unbounded (ban risk if the agent looped them).
+- Shareable Wrapped/Rewind SVG cards pseudonymize contact names under privacy
+  mode, so a posted card doesn't leak your contacts.
+- `data/` + `auth_info/` locked to `0700` and DB files to `0600` (POSIX).
+- Added `test/harden-test.mjs` (28 checks) covering the above.
 
 **Infra:** zero native deps (node:sqlite), raw proto persistence for media/forward,
 npx + Docker install, GitHub Actions CI, demo scripts, 75 tests + MCP smoke.

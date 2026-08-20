@@ -52,7 +52,31 @@ export function setMode(mode: SafetyMode): void {
   setSetting("mode", mode);
 }
 
-/** Throw unless mutations are allowed in the current mode. */
+// Rolling-window timestamps of every write action, for the anti-runaway cap.
+const actionTimes: number[] = [];
+
+/**
+ * Ceiling on ALL write actions per rolling minute (reactions, edits, deletes,
+ * read receipts, presence, sends, group/profile ops). Generous by default so
+ * normal use is unaffected, but it stops a compromised/injected agent from
+ * firing actions in a tight loop and getting the number banned.
+ */
+export function assertActionRate(action: string): void {
+  const now = Date.now();
+  const cutoff = now - 60_000;
+  while (actionTimes.length && actionTimes[0]! < cutoff) actionTimes.shift();
+  if (actionTimes.length >= config.actionsPerMinute) {
+    throw new SafetyError(
+      "rate_action",
+      `Blocked: too many actions this minute (cap ${config.actionsPerMinute}) while running '${action}'. ` +
+        `This anti-runaway limit protects the account from bans; raise WAMCP_ACTIONS_PER_MINUTE if intentional.`,
+    );
+  }
+  actionTimes.push(now);
+}
+
+/** Throw unless mutations are allowed in the current mode; also enforces the
+ * global per-minute action cap. Every mutating tool calls this. */
 export function assertMutationsAllowed(action: string): void {
   if (getMode() === "read-only") {
     throw new SafetyError(
@@ -61,6 +85,7 @@ export function assertMutationsAllowed(action: string): void {
         `Set WAMCP_MODE=assisted (and re-approve) to enable sending.`,
     );
   }
+  assertActionRate(action);
 }
 
 /** Enforce the recipient allowlist when enabled. */

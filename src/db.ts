@@ -1,5 +1,6 @@
 import { DatabaseSync } from "node:sqlite";
 import path from "node:path";
+import fs from "node:fs";
 import { proto, type WAMessage } from "baileys";
 import { config, ensureDirs } from "./config.ts";
 
@@ -43,7 +44,13 @@ let dbInstance: DatabaseSync | null = null;
 function getDb(): DatabaseSync {
   if (!dbInstance) {
     ensureDirs();
-    dbInstance = new DatabaseSync(path.join(config.dataDir, "whatsapp.db"));
+    const dbPath = path.join(config.dataDir, "whatsapp.db");
+    dbInstance = new DatabaseSync(dbPath);
+    // The DB holds every message + your full address book — lock to owner-only
+    // where the OS honors it (POSIX). Best effort; no-op on Windows.
+    for (const f of [dbPath, dbPath + "-wal", dbPath + "-shm"]) {
+      try { if (fs.existsSync(f)) fs.chmodSync(f, 0o600); } catch { /* best effort */ }
+    }
   }
   return dbInstance;
 }

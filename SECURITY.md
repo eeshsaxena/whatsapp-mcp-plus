@@ -21,9 +21,12 @@ make the agent exfiltrate your data or send messages on your behalf. Mitigations
 **Local data.** All messages are stored in a local SQLite DB and never leave your
 machine except through an explicit tool call by your agent. Pairing credentials
 live in `auth_info/` (created with `0700` where the OS honors it) and are
-git-ignored. Do not commit `data/` or `auth_info/`. The DB, logs, and downloaded
-media are stored in plaintext, so keep the project out of a cloud-synced folder
-(OneDrive/Dropbox/Drive) and off shared machines.
+git-ignored. Do not commit `data/` or `auth_info/`. `data/` and `auth_info/` are
+created `0700` and the DB files `0600` (owner-only) where the OS honors it
+(POSIX); Windows applies only the read-only bit. The DB, logs, and downloaded
+media are still stored **unencrypted** (encryption-at-rest would require a native
+dependency, which this project avoids), so keep the project out of a cloud-synced
+folder (OneDrive/Dropbox/Drive) and off shared machines.
 
 **Data goes to your LLM.** Reading is not the same as private: any tool result
 (messages, contacts, analytics) is returned to whatever MCP client / LLM provider
@@ -65,7 +68,11 @@ the model, it is scrubbed:
 
 **Account safety.** This uses an unofficial WhatsApp client (Baileys); misuse can
 get your number banned. Rate limiting, allowlisting, and read-only defaults are
-designed to keep usage in the low-risk zone. See the README disclaimer.
+designed to keep usage in the low-risk zone. In addition to the per-recipient
+send limits, a global **per-minute cap on ALL write actions**
+(`WAMCP_ACTIONS_PER_MINUTE`, default 60) covers reactions/edits/deletes/read
+receipts/presence too, so a compromised agent cannot loop actions and trip a ban.
+See the README disclaimer.
 
 ## Reporting a vulnerability
 

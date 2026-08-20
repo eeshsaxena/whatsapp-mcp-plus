@@ -1,4 +1,5 @@
 import type { WrappedStats } from "../db.ts";
+import { contactLabel } from "../privacy.ts";
 
 /**
  * Render a shareable "WhatsApp Wrapped" card as a self-contained SVG string.
@@ -41,7 +42,7 @@ export function renderWrappedSVG(stats: WrappedStats, opts: CardOptions = {}): s
 
   const contactRows = topContacts.map((c, i) => {
     const y = 468 + i * 46;
-    const name = esc((c.name ?? c.jid.split("@")[0]).slice(0, 20));
+    const name = esc(contactLabel(c.name, c.jid).slice(0, 20));
     const max = topContacts[0]?.count || 1;
     const barW = Math.max(6, Math.round((c.count / max) * 250));
     return `

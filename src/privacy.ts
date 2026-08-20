@@ -115,6 +115,20 @@ export function scrubOutput(value: any, key?: string): any {
   return value;
 }
 
+/**
+ * Display label for a contact in shareable artifacts (Wrapped card, Rewind).
+ * Under privacy mode the real name/number is replaced by a stable alias so a
+ * card posted publicly does not leak your contacts. With privacy off, the real
+ * name (or phone-number fallback) is shown.
+ */
+export function contactLabel(name: string | null | undefined, jid: string): string {
+  if (config.privacy) {
+    if (name) return getOrCreatePseudonym("waname", name);
+    return getOrCreatePseudonym(jid.endsWith("@g.us") ? "wagrp" : "waid", jid);
+  }
+  return name ?? jid.split("@")[0];
+}
+
 /** Reverse alias tokens in tool-call arguments so the real identifier is used. */
 export function dePseudonymizeArgs(args: any): any {
   if (!config.privacy || args == null) return args;
