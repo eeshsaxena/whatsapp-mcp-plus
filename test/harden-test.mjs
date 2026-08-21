@@ -90,6 +90,16 @@ let blocked = false;
 for (let i = 0; i < 12 && !blocked; i++) { try { assertActionRate("react_to_message"); } catch { blocked = true; } }
 ok(blocked, "per-minute action cap eventually blocks");
 
+// --- prototype-pollution defense in the object walkers ---
+{
+  const evil = JSON.parse('{"__proto__":{"polluted":true},"chat_jid":"hi"}');
+  const cleaned = dePseudonymizeArgs(evil);
+  ok(({}).polluted === undefined, "no Object.prototype pollution via dePseudonymizeArgs");
+  ok(!Object.prototype.hasOwnProperty.call(cleaned, "__proto__"), "dangerous __proto__ key dropped on input");
+  const out = scrubOutput(JSON.parse('{"__proto__":{"x":1},"name":"Carol"}'));
+  ok(!Object.prototype.hasOwnProperty.call(out, "__proto__"), "dangerous __proto__ key dropped on output");
+}
+
 // --- filename sanitization (path traversal) ---
 ok(!sanitizeFilename("../../etc/passwd").includes("/"), "sanitizeFilename strips slashes");
 ok(sanitizeFilename("..") === "file", "sanitizeFilename neutralizes '..'");

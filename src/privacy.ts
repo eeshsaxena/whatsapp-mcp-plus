@@ -95,6 +95,9 @@ export function scrubText(text: unknown): any {
 
 const NAME_KEYS = new Set(["name", "chat_name", "sender_display", "displayName", "contact_name"]);
 const NAME_SKIP = new Set(["Me", "Unknown", "Unknown Chat", "status", ""]);
+// Never copy these keys when rebuilding objects — assigning them via out[k]=…
+// would set a prototype (prototype-pollution defense).
+const DANGEROUS_KEYS = new Set(["__proto__", "constructor", "prototype"]);
 
 /** Deep-scrub a value destined for the LLM (object graph, arrays, strings). */
 export function scrubOutput(value: any, key?: string): any {
@@ -109,7 +112,10 @@ export function scrubOutput(value: any, key?: string): any {
   if (Array.isArray(value)) return value.map((v) => scrubOutput(v));
   if (value && typeof value === "object") {
     const out: any = {};
-    for (const [k, v] of Object.entries(value)) out[k] = scrubOutput(v, k);
+    for (const [k, v] of Object.entries(value)) {
+      if (DANGEROUS_KEYS.has(k)) continue;
+      out[k] = scrubOutput(v, k);
+    }
     return out;
   }
   return value;
@@ -138,7 +144,10 @@ export function dePseudonymizeArgs(args: any): any {
   if (Array.isArray(args)) return args.map(dePseudonymizeArgs);
   if (typeof args === "object") {
     const out: any = {};
-    for (const [k, v] of Object.entries(args)) out[k] = dePseudonymizeArgs(v);
+    for (const [k, v] of Object.entries(args)) {
+      if (DANGEROUS_KEYS.has(k)) continue;
+      out[k] = dePseudonymizeArgs(v);
+    }
     return out;
   }
   return args;

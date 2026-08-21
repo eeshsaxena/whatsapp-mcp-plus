@@ -27,6 +27,9 @@ export function withTimeout<T>(p: Promise<T>, ms: number, label: string): Promis
       ms,
     );
   });
+  // If the timeout wins, `p` may still reject later; swallow that so it never
+  // surfaces as an unhandledRejection (which can crash the process).
+  p.catch(() => {});
   return Promise.race([p, timeout]).finally(() => clearTimeout(timer)) as Promise<T>;
 }
 

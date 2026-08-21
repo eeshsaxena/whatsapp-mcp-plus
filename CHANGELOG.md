@@ -50,7 +50,10 @@ government IDs, bank codes, API keys, OTP codes) are redacted.
 - Destructive actions (delete_message, block_contact, group_leave, group
   participant-remove) now require the same two-step confirm as sends, so a
   prompt-injected agent can't fire them in one shot.
-- Added `test/harden-test.mjs` (34 checks) covering the above.
+- Prototype-pollution defense: the privacy object-walkers drop `__proto__`/
+  `constructor`/`prototype` keys instead of copying them.
+- No unhandled rejection from the Baileys call-timeout race (was a possible crash).
+- Added `test/harden-test.mjs` (37 checks) covering the above.
 
 **Performance:** history sync batches each chunk into a single transaction and
 reuses cached prepared statements — ~28x faster bulk message inserts (10k rows:
