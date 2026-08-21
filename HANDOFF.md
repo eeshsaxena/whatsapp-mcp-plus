@@ -8,8 +8,8 @@ successor to the abandoned `lharries/whatsapp-mcp` (6.1k stars). Goal: stars.
 Strategy in `BUILD_PLAN.md`; launch plan in `LAUNCH.md`.
 
 ## Current state: LIVE-TESTED END TO END. SECURITY-HARDENED. PUSHED. Near launch.
-- `origin/main` @ **70a4c26** (repo: github.com/eeshsaxena/whatsapp-mcp-plus).
-- Deterministic suite green: **156 checks + MCP stdio smoke (52 tools)**, `npm test`.
+- `origin/main` @ **b57db45** (repo: github.com/eeshsaxena/whatsapp-mcp-plus).
+- Deterministic suite green: **164 checks + MCP stdio smoke (52 tools)**, `npm test`.
 - **Lint + typecheck clean** (`npm run lint`, `npm run typecheck`); CI runs lint +
   typecheck + the full suite on Node 24.
 - Working tree: clean except this HANDOFF (uncommitted by design).
@@ -87,16 +87,24 @@ Strategy in `BUILD_PLAN.md`; launch plan in `LAUNCH.md`.
    (drop __proto__/constructor/prototype); waCall timeout race no longer leaks an
    unhandledRejection.
 
-## Remaining pen-test findings (found, NOT yet fixed)
-- **[LOW/design] Allowlist "messaged-first" weakening.** isKnownRecipient() treats
-  anyone who has messaged the user as a valid send target, so a stranger who
-  texts first becomes reachable by an injected agent. Documented tradeoff; could
-  require explicit allowlist_add for first contact.
-- **[LOW/note] At-rest encryption** not implemented (node:sqlite has none without a
-  native dep); mitigated by 0700/0600 perms + docs.
+## Recently closed (commits 10-11)
+- **a9e17f8 — Allowlist tightened.** isKnownRecipient() now = explicitly
+  allowlisted OR an established chat you've SENT to OR a group you're in. Synced-
+  contact-only and inbound-stranger no longer auto-trusted (opt back in with
+  WAMCP_ALLOWLIST_CONTACTS / WAMCP_ALLOWLIST_INBOUND).
+- **b57db45 — Consent scopes + setup wizard (was the open decision, now BUILT).**
+  Every tool has a feature scope (read/analytics/media/send/groups/profile);
+  only enabled scopes work (WAMCP_SCOPES default read,analytics). Central gate
+  wraps server.tool (src/mcp/server.ts + src/safety/scopes.ts). `npm run setup`
+  wizard (scripts/setup.mjs, has --defaults path) writes .env. get_status shows
+  scopes. Verified over stdio: send blocked / read allowed at default scopes.
 
-Non-security work still open: consent/scopes + setup-wizard (below); live-test
-groups/media/transcription.
+## Remaining findings (LOW, documented, not code-fixed)
+- **At-rest encryption** not implemented (node:sqlite has none without a native
+  dep, which breaks the zero-native-deps design); mitigated by 0700/0600 perms.
+
+Non-security work still open: per-chat exclude (`WAMCP_EXCLUDE_CHATS`, deferred);
+live-test groups/media/transcription. Then npm publish + LAUNCH.md.
 
 ## Live testing performed this session (all cleaned up)
 - **Read/analytics over real 2115-msg history:** get_status/get_me/list_chats/
@@ -110,20 +118,10 @@ groups/media/transcription.
 - **Safety rails confirmed live:** read-only blocks sends; allowlist blocks a
   stranger; confirm-token flow works.
 
-## OPEN DECISION (proposed, NOT built — he dismissed the choice, awaiting direction)
-Plug-and-play + per-feature consent. Proposed design:
-- **Feature scopes** gating all 52 tools: `read`, `analytics`, `media`, `send`,
-  `groups`, `profile`. Safe default = `read`+`analytics` on, rest off until the
-  user opts in (disabled scope's tools return a clear "enable the '<x>' scope").
-  Env: `WAMCP_SCOPES=read,analytics`.
-- **Setup wizard** (`npm run setup`): interactive, asks in plain language what to
-  allow + privacy/mode, writes `.env`, prints the MCP client snippet. (Note: can't
-  be exercised interactively in the Claude Code sandbox — stdin is EOF; build with
-  a `--defaults`/piped path for testing.)
-- **Per-chat privacy**: `WAMCP_EXCLUDE_CHATS` so chosen chats are never returned.
-He wants this consent-first and plug-and-play. Pick approach then implement across
-all tool modules (they all use `safeHandler`/`assertMutationsAllowed`, so a
-`assertScope(scope)` helper in safety/ + one call per tool is the shape).
+## Consent scopes + wizard — DONE (b57db45), see "Recently closed" above
+Only deferred piece: per-chat exclude (`WAMCP_EXCLUDE_CHATS`) so chosen chats are
+never returned by read/analytics — not yet built; would slot into read.ts queries
++ scrubOutput.
 
 ## Known issues / leftovers
 - **Leftover test msg**: `[wamcp test] reply B` sits in HIS OWN self-chat
