@@ -31,6 +31,7 @@
     "test:mcp": "node test/smoke-mcp.mjs",
     "test:call": "node test/smoke-call.mjs",
     "test": "npm run build && npm run test:pure && npm run test:guard && npm run test:security && npm run test:harden && npm run test:safety && npm run test:logic && npm run test:features && npm run test:bughunt && npm run test:mcp",
+    "setup": "node scripts/setup.mjs",
     "demo": "npm run build && node scripts/demo.mjs",
     "card": "npm run build && node scripts/gen-sample-card.mjs",
     "rewind": "npm run build && node scripts/gen-rewind.mjs"

@@ -24,6 +24,12 @@ a maintained successor to the abandoned `lharries/whatsapp-mcp`.
 **Safety (safe by default):** read-only mode, contact allowlist, rate limiting,
 confirm-to-send, prompt-injection guard.
 
+**Consent scopes + setup wizard:** every tool belongs to a feature scope
+(`read`/`analytics`/`media`/`send`/`groups`/`profile`); only enabled scopes work
+(`WAMCP_SCOPES`, default `read,analytics`), so sending/media/groups/profile are
+opt-in. `npm run setup` is a guided wizard that writes `.env` and prints the MCP
+client config. `get_status` reports the active scopes.
+
 **Privacy (default ON, `WAMCP_PRIVACY`):** before results reach the LLM,
 identifiers (JIDs, phone numbers, emails, contact names) are pseudonymized to
 reversible local aliases, and structured secrets in message text (payment cards,

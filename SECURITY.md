@@ -78,6 +78,14 @@ the model, it is scrubbed:
   backtracking), verified fast on 120 KB of crafted input.
 - **Parameterized SQL** throughout; `LIKE` patterns escape user wildcards.
 
+**Consent scopes.** Every tool belongs to a feature scope — `read`, `analytics`,
+`media`, `send`, `groups`, `profile` — and only runs if that scope is enabled
+(`WAMCP_SCOPES`, default `read,analytics`). Control tools (status, mode, allowlist)
+are always available. So out of the box the assistant can read and analyze but
+cannot send, download media, manage groups, or change your profile until you opt
+in — a disabled scope's tools return a clear "enable this scope" message. Run
+`npm run setup` for a guided, plain-language choice of scopes, mode, and privacy.
+
 **Account safety.** This uses an unofficial WhatsApp client (Baileys); misuse can
 get your number banned. Rate limiting, allowlisting, and read-only defaults are
 designed to keep usage in the low-risk zone. In addition to the per-recipient

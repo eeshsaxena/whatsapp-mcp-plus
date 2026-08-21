@@ -1,7 +1,7 @@
 import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { getSock, getConnectionState } from "../../whatsapp/connection.ts";
-import { describeSafety } from "../../config.ts";
+import { config, describeSafety } from "../../config.ts";
 import { cacheSize } from "../../whatsapp/msgcache.ts";
 import {
   addToAllowlist,
@@ -28,6 +28,7 @@ export function registerAdminTools(server: McpServer): void {
         connection_state: getConnectionState(),
         me: sock?.user?.id ?? null,
         mode: getMode(),
+        scopes: [...config.scopes],
         safety: describeSafety(),
         cached_messages: cacheSize(),
         pending_confirmations: listPending(),

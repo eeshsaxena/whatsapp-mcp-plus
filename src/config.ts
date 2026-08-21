@@ -79,6 +79,25 @@ export interface Config {
    * restriction. Set via WAMCP_SEND_FILE_ROOTS (comma-separated).
    */
   sendFileRoots: string[];
+  /**
+   * Enabled feature scopes (consent). A tool only works if its scope is enabled.
+   * Default is the minimal, safe set (read + analytics); the user opts into the
+   * rest (media, send, groups, profile) via WAMCP_SCOPES or `npm run setup`.
+   */
+  scopes: Set<string>;
+}
+
+/** All recognized feature scopes, in a stable display order. */
+export const ALL_SCOPES = ["read", "analytics", "media", "send", "groups", "profile"] as const;
+
+function resolveScopes(): Set<string> {
+  const raw = (process.env.WAMCP_SCOPES ?? "read,analytics").toLowerCase().trim();
+  if (raw === "all" || raw === "*") return new Set(ALL_SCOPES);
+  const set = new Set(
+    raw.split(",").map((s) => s.trim()).filter((s) => (ALL_SCOPES as readonly string[]).includes(s)),
+  );
+  if (set.size === 0) return new Set(["read", "analytics"]);
+  return set;
 }
 
 function resolveMode(): SafetyMode {
@@ -140,6 +159,7 @@ export const config: Config = {
   actionsPerMinute: Math.max(1, envInt("WAMCP_ACTIONS_PER_MINUTE", 60)),
   sendFileRoots: (process.env.WAMCP_SEND_FILE_ROOTS || "")
     .split(",").map((s) => s.trim()).filter(Boolean),
+  scopes: resolveScopes(),
 };
 
 export function ensureDirs(): void {

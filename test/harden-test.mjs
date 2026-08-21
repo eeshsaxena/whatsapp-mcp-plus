@@ -14,6 +14,7 @@ const { initializeDatabase } = await import("../dist/db.js");
 const { scrubOutput, scrubText, dePseudonymizeArgs, contactLabel } = await import("../dist/privacy.js");
 const { assertNotSensitivePath, sanitizeFilename, assertWritablePath } = await import("../dist/security.js");
 const { assertActionRate, guardedMutation, setMode, confirmAction } = await import("../dist/safety/index.js");
+const { scopeForTool, scopeEnabled } = await import("../dist/safety/scopes.js");
 
 initializeDatabase();
 
@@ -89,6 +90,14 @@ ok(ran === true, "confirm_action executes the staged destructive op");
 let blocked = false;
 for (let i = 0; i < 12 && !blocked; i++) { try { assertActionRate("react_to_message"); } catch { blocked = true; } }
 ok(blocked, "per-minute action cap eventually blocks");
+
+// --- feature scopes (consent gating) ---
+ok(scopeForTool("send_message") === "send", "send_message -> send scope");
+ok(scopeForTool("list_messages") === "read", "list_messages -> read scope");
+ok(scopeForTool("whatsapp_wrapped") === "analytics", "whatsapp_wrapped -> analytics scope");
+ok(scopeForTool("get_status") === undefined, "control tool has no scope (always allowed)");
+ok(scopeEnabled("read") && scopeEnabled("analytics"), "default scopes: read + analytics enabled");
+ok(!scopeEnabled("send") && !scopeEnabled("profile"), "default scopes: send/profile disabled (opt-in)");
 
 // --- prototype-pollution defense in the object walkers ---
 {
