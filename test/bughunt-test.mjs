@@ -2,7 +2,6 @@
 import os from "node:os";
 import path from "node:path";
 import fs from "node:fs";
-import assert from "node:assert";
 
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "wamcp-bug-"));
 process.env.WAMCP_DATA_DIR = tmp;

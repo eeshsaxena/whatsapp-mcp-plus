@@ -46,7 +46,7 @@ function redactSecrets(text: string): string {
   s = s.replace(/\b(?:gh[opsu]_|github_pat_)[A-Za-z0-9_]{20,}\b/g, "[redacted-key]");
   s = s.replace(/\bAKIA[0-9A-Z]{16}\b/g, "[redacted-key]");
   s = s.replace(/\bxox[baprs]-[A-Za-z0-9-]{10,}\b/g, "[redacted-key]");
-  s = s.replace(/\bBearer\s+[A-Za-z0-9._~+\/-]{16,}=*/gi, "Bearer [redacted-token]");
+  s = s.replace(/\bBearer\s+[A-Za-z0-9._~+/-]{16,}=*/gi, "Bearer [redacted-token]");
   // Passwords / OTP / CVV by keyword proximity.
   s = s.replace(/\b(password|passcode|pwd|passwd)\b\s*[:=]?\s*\S+/gi, "$1: [redacted]");
   s = s.replace(/\b(otp|code|verification|passcode|pin)\b[^0-9]{0,20}(\d{4,8})\b/gi, (_m, w) => `${w} [redacted-code]`);

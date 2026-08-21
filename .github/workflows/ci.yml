@@ -12,17 +12,16 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          # node:sqlite is stable (no flag) from Node 24; the package targets >=24.
+          node-version: "24"
           cache: "npm"
       - run: npm ci
+      - name: Lint
+        run: npm run lint
       - name: Typecheck
         run: npm run typecheck
-      - name: Build
-        run: npm run build
-      # Deterministic, network-free tests (the MCP smoke test starts a WhatsApp
-      # connection attempt, so it is excluded from CI).
-      - name: Unit + logic tests
-        run: |
-          npm run test:pure
-          npm run test:logic
-          npm run test:features
+      # `npm test` builds, then runs every deterministic suite plus the MCP stdio
+      # smoke test. All of it is network-free (the smoke test runs with
+      # WAMCP_NO_WA=1), so the whole suite is safe to run in CI.
+      - name: Build + full test suite
+        run: npm test

@@ -20,6 +20,9 @@ const INJECTION_PATTERNS: { pattern: RegExp; label: string }[] = [
   { pattern: /<\s*\/?\s*(system|assistant|tool)\b/i, label: "role-tag-injection" },
   { pattern: /\bact\s+as\s+(if\s+you\s+are\s+)?an?\b/i, label: "role-hijack" },
   // zero-width / bidi control characters often used to hide instructions
+  // (ZWSP..RLM, LRE..RLO/PDF, word-joiner..invisible-plus). The literal control
+  // chars in the class are intentional, so the rule is disabled for this line.
+  // eslint-disable-next-line no-irregular-whitespace
   { pattern: /[​-‏‪-‮⁠-⁤]/, label: "hidden-unicode" },
 ];
 

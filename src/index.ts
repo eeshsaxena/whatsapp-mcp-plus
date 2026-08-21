@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { config, describeSafety, ensureDirs } from "./config.ts";
+import { describeSafety, ensureDirs } from "./config.ts";
 import { logger, waLogger } from "./logger.ts";
 import { initializeDatabase, closeDatabase } from "./db.ts";
 import { startWhatsAppConnection } from "./whatsapp/connection.ts";
