@@ -17,7 +17,12 @@ make the agent exfiltrate your data or send messages on your behalf. Mitigations
 - **Injection guard.** Incoming messages that look like instructions to an AI are
   flagged, and message lists returned to the model carry a warning banner telling
   it to treat content as data, not commands.
-- **Allowlist.** Sends are restricted to known contacts by default.
+- **Allowlist (tightened).** Sends are restricted to *known* recipients:
+  explicitly allowlisted, an established chat you have **sent to** before, or a
+  group you belong to. A stranger who merely messaged you, or an entry that only
+  exists in the synced address book, is **not** auto-trusted, so an injected agent
+  cannot exfiltrate to them without an explicit `allowlist_add`. `WAMCP_ALLOWLIST_
+  CONTACTS` / `WAMCP_ALLOWLIST_INBOUND` (default off) loosen this if desired.
 
 **Local data.** All messages are stored in a local SQLite DB and never leave your
 machine except through an explicit tool call by your agent. Pairing credentials

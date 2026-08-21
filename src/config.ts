@@ -33,9 +33,16 @@ export interface Config {
   requireConfirm: boolean;
   /**
    * When true, sends are only permitted to JIDs we already have a relationship
-   * with (an existing contact, or a chat where they messaged us first).
+   * with. By default that means: explicitly allowlisted, an established chat you
+   * have SENT to before, or a group you are a member of. The two flags below
+   * (default OFF) loosen it to also trust any synced contact / any stranger who
+   * messaged you first.
    */
   allowlistOnly: boolean;
+  /** Also treat anyone in the synced address book as a known recipient. */
+  allowlistContacts: boolean;
+  /** Also treat anyone who has messaged you first as a known recipient. */
+  allowlistInbound: boolean;
   rateLimit: RateLimitConfig;
   /** Optional path to a whisper-compatible transcription binary/endpoint. */
   transcriptionCmd: string | null;
@@ -117,6 +124,8 @@ export const config: Config = {
   mode,
   requireConfirm: envBool("WAMCP_REQUIRE_CONFIRM", safeDefaults),
   allowlistOnly: envBool("WAMCP_ALLOWLIST_ONLY", safeDefaults),
+  allowlistContacts: envBool("WAMCP_ALLOWLIST_CONTACTS", false),
+  allowlistInbound: envBool("WAMCP_ALLOWLIST_INBOUND", false),
   rateLimit: {
     perMinute: envInt("WAMCP_RATE_PER_MINUTE", 8),
     perDay: envInt("WAMCP_RATE_PER_DAY", 200),

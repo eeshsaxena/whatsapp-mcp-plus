@@ -31,10 +31,18 @@ check("setMode persists (assisted)", safety.getMode() === "assisted");
 safety.assertMutationsAllowed("send_message"); // should NOT throw now
 check("assisted allows mutations", true);
 
-// --- allowlist ----------------------------------------------------------------
-db.storeContact({ jid: "111@s.whatsapp.net", name: "Alice" });
-safety.assertRecipientAllowed("111@s.whatsapp.net"); // known -> ok
-check("known contact passes allowlist", true);
+// --- allowlist (tightened: explicit allowlist OR established/sent-to OR group) --
+db.addToAllowlist("111@s.whatsapp.net");
+safety.assertRecipientAllowed("111@s.whatsapp.net"); // explicitly allowlisted -> ok
+check("allowlisted recipient passes", true);
+
+db.storeMessage({ id: "s1", chat_jid: "333@s.whatsapp.net", sender: null, content: "hi", timestamp: new Date(), is_from_me: true, message_type: "text", media_type: null, raw: null });
+safety.assertRecipientAllowed("333@s.whatsapp.net"); // established (you've sent) -> ok
+check("established (sent-to) recipient passes", true);
+
+// A synced contact you have NOT allowlisted or messaged is NO LONGER auto-trusted.
+db.storeContact({ jid: "222@s.whatsapp.net", name: "Bob (synced only)" });
+await throwsWith("synced-contact-only is blocked (tightened)", async () => safety.assertRecipientAllowed("222@s.whatsapp.net"), "allowlist");
 await throwsWith("stranger blocked by allowlist", async () => safety.assertRecipientAllowed("999@s.whatsapp.net"), "allowlist");
 
 // --- rate limit ---------------------------------------------------------------

@@ -52,6 +52,10 @@ government IDs, bank codes, API keys, OTP codes) are redacted.
   prompt-injected agent can't fire them in one shot.
 - Prototype-pollution defense: the privacy object-walkers drop `__proto__`/
   `constructor`/`prototype` keys instead of copying them.
+- Tightened allowlist: "known" now means explicitly allowlisted, an established
+  chat you've sent to, or a group you belong to — a stranger who only messaged
+  you (or a synced-only contact) is no longer auto-trusted. `WAMCP_ALLOWLIST_
+  CONTACTS` / `WAMCP_ALLOWLIST_INBOUND` (default off) restore the looser behavior.
 - No unhandled rejection from the Baileys call-timeout race (was a possible crash).
 - Added `test/harden-test.mjs` (37 checks) covering the above.
 

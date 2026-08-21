@@ -578,14 +578,18 @@ export function searchMessages(searchQuery: string, chatJid?: string | null, lim
 export function isKnownRecipient(jid: string): boolean {
   const db = getDb();
   try {
-    const inContacts = db.prepare(`SELECT 1 FROM contacts WHERE jid = ? LIMIT 1`).get(jid);
-    if (inContacts) return true;
-    const inbound = db.prepare(
-      `SELECT 1 FROM messages WHERE chat_jid = ? AND is_from_me = 0 LIMIT 1`,
-    ).get(jid);
-    if (inbound) return true;
-    const allowed = db.prepare(`SELECT 1 FROM allowlist WHERE jid = ? LIMIT 1`).get(jid);
-    return Boolean(allowed);
+    // 1. Explicitly allowlisted — always trusted.
+    if (db.prepare(`SELECT 1 FROM allowlist WHERE jid = ? LIMIT 1`).get(jid)) return true;
+    // 2. Established relationship: you have SENT to this chat before.
+    if (db.prepare(`SELECT 1 FROM messages WHERE chat_jid = ? AND is_from_me = 1 LIMIT 1`).get(jid)) return true;
+    // 3. A group you are a member of (synced into your chat list).
+    if (jid.endsWith("@g.us") && db.prepare(`SELECT 1 FROM chats WHERE jid = ? LIMIT 1`).get(jid)) return true;
+    // 4. Looser signals, OFF by default (a stranger who texts first, or anyone in
+    //    the synced address book, is otherwise NOT auto-trusted — a prompt-injected
+    //    agent can't exfiltrate to them without an explicit allowlist_add).
+    if (config.allowlistContacts && db.prepare(`SELECT 1 FROM contacts WHERE jid = ? LIMIT 1`).get(jid)) return true;
+    if (config.allowlistInbound && db.prepare(`SELECT 1 FROM messages WHERE chat_jid = ? AND is_from_me = 0 LIMIT 1`).get(jid)) return true;
+    return false;
   } catch (e) {
     console.error("isKnownRecipient error", e);
     return false;

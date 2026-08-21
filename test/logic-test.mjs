@@ -49,7 +49,7 @@ check("searchDbForContacts finds Alice", contacts.some((c) => c.name === "Alice"
 
 // --- allowlist / relationship logic ------------------------------------------
 check("isKnownRecipient true for contact Alice", db.isKnownRecipient("111@s.whatsapp.net") === true);
-check("isKnownRecipient true for Bob (messaged first)", db.isKnownRecipient("222@s.whatsapp.net") === true);
+check("isKnownRecipient FALSE for Bob (inbound-only, tightened default)", db.isKnownRecipient("222@s.whatsapp.net") === false);
 check("isKnownRecipient false for stranger", db.isKnownRecipient("999@s.whatsapp.net") === false);
 db.addToAllowlist("999@s.whatsapp.net");
 check("isKnownRecipient true after allowlist_add", db.isKnownRecipient("999@s.whatsapp.net") === true);
