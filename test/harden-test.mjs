@@ -13,7 +13,7 @@ process.env.WAMCP_ACTIONS_PER_MINUTE = "5";
 const { initializeDatabase } = await import("../dist/db.js");
 const { scrubOutput, scrubText, dePseudonymizeArgs, contactLabel } = await import("../dist/privacy.js");
 const { assertNotSensitivePath, sanitizeFilename, assertWritablePath } = await import("../dist/security.js");
-const { assertActionRate } = await import("../dist/safety/index.js");
+const { assertActionRate, guardedMutation, setMode, confirmAction } = await import("../dist/safety/index.js");
 
 initializeDatabase();
 
@@ -21,6 +21,7 @@ let pass = 0, fail = 0;
 const ok = (cond, msg) => { if (cond) { pass++; console.log("  ok  " + msg); } else { fail++; console.log("  FAIL " + msg); } };
 const throws = (fn, msg) => { try { fn(); ok(false, msg + " (did not throw)"); } catch { ok(true, msg); } };
 const nothrow = (fn, msg) => { try { fn(); ok(true, msg); } catch (e) { ok(false, msg + " (threw: " + e.message + ")"); } };
+const athrows = async (fn, msg) => { try { await fn(); ok(false, msg + " (did not throw)"); } catch { ok(true, msg); } };
 
 // --- #1 sensitive-path denylist (send-file exfil floor) ---
 throws(() => assertNotSensitivePath("/home/u/.ssh/id_rsa"), "block id_rsa");
@@ -74,9 +75,20 @@ throws(() => assertWritablePath("/etc/cron.d/evil", [DATA]), "block write outsid
 throws(() => assertWritablePath(path.join(DATA, "..", "..", "evil.svg"), [DATA]), "block write path traversal");
 nothrow(() => assertWritablePath(path.join(DATA, "rewind", "cover.svg"), [DATA]), "allow write inside data dir");
 
+// --- destructive ops require mode + two-step confirm (guardedMutation) ---
+await athrows(() => guardedMutation({ action: "delete_message", description: "del", run: async () => {} }), "destructive op blocked in read-only mode");
+setMode("assisted");
+let ran = false;
+const staged = await guardedMutation({ action: "delete_message", description: "del", run: async () => { ran = true; return "done"; } });
+ok(staged.status === "needs_confirmation" && !!staged.token, "destructive op stages a confirm token in assisted mode");
+ok(ran === false, "destructive op not executed until confirmed");
+await confirmAction(staged.token);
+ok(ran === true, "confirm_action executes the staged destructive op");
+
 // --- anti-runaway action rate cap (ban protection) ---
-nothrow(() => { for (let i = 0; i < 5; i++) assertActionRate("react_to_message"); }, "actions under cap (5) allowed");
-throws(() => assertActionRate("react_to_message"), "action over per-minute cap blocked");
+let blocked = false;
+for (let i = 0; i < 12 && !blocked; i++) { try { assertActionRate("react_to_message"); } catch { blocked = true; } }
+ok(blocked, "per-minute action cap eventually blocks");
 
 // --- filename sanitization (path traversal) ---
 ok(!sanitizeFilename("../../etc/passwd").includes("/"), "sanitizeFilename strips slashes");

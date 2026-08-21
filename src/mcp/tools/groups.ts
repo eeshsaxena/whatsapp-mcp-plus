@@ -10,7 +10,7 @@ import {
   groupInfo,
   groupLeave,
 } from "../../whatsapp/actions.ts";
-import { assertMutationsAllowed } from "../../safety/index.ts";
+import { assertMutationsAllowed, guardedMutation } from "../../safety/index.ts";
 import { jsonResult, textResult, safeHandler } from "../format.ts";
 
 export function registerGroupTools(server: McpServer): void {
@@ -49,8 +49,20 @@ export function registerGroupTools(server: McpServer): void {
       group_jid: z.string(),
       participants: z.array(z.string()).min(1),
       action: z.enum(["add", "remove", "promote", "demote"]),
+      confirm_token: z.string().optional().describe("Token to confirm a staged 'remove'"),
     },
-    safeHandler(async ({ group_jid, participants, action }: any) => {
+    safeHandler(async ({ group_jid, participants, action, confirm_token }: any) => {
+      // Removing (kicking) participants is destructive -> stage/confirm; add/
+      // promote/demote proceed directly under the mode + action-rate gate.
+      if (action === "remove") {
+        const outcome = await guardedMutation({
+          action: "group_update_participants",
+          description: `Remove ${participants.length} participant(s) from ${group_jid}`,
+          confirmToken: confirm_token,
+          run: () => groupParticipants(getSock(), group_jid, participants, action),
+        });
+        return jsonResult(outcome);
+      }
       assertMutationsAllowed("group_update_participants");
       const res = await groupParticipants(getSock(), group_jid, participants, action);
       return jsonResult(res);
@@ -88,11 +100,15 @@ export function registerGroupTools(server: McpServer): void {
 
   server.tool(
     "group_leave",
-    { group_jid: z.string() },
-    safeHandler(async ({ group_jid }: any) => {
-      assertMutationsAllowed("group_leave");
-      await groupLeave(getSock(), group_jid);
-      return textResult(`Left group ${group_jid}`);
+    { group_jid: z.string(), confirm_token: z.string().optional() },
+    safeHandler(async ({ group_jid, confirm_token }: any) => {
+      const outcome = await guardedMutation({
+        action: "group_leave",
+        description: `Leave group ${group_jid}`,
+        confirmToken: confirm_token,
+        run: () => groupLeave(getSock(), group_jid),
+      });
+      return jsonResult(outcome);
     }),
   );
 }

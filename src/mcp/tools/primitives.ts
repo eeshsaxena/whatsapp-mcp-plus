@@ -12,7 +12,7 @@ import {
   forwardText,
   forwardMessage,
 } from "../../whatsapp/actions.ts";
-import { assertMutationsAllowed, guardedSend } from "../../safety/index.ts";
+import { assertMutationsAllowed, guardedSend, guardedMutation } from "../../safety/index.ts";
 import { textResult, jsonResult, safeHandler, errorResult } from "../format.ts";
 import { normalizeRecipient } from "./send.ts";
 
@@ -64,17 +64,22 @@ export function registerPrimitiveTools(server: McpServer): void {
     "delete_message",
     {
       message_id: z.string().describe("Delete for everyone; only works for your own recent messages"),
+      confirm_token: z.string().optional().describe("Token from a prior staged delete, to confirm it"),
     },
-    safeHandler(async ({ message_id }: any) => {
-      assertMutationsAllowed("delete_message");
+    safeHandler(async ({ message_id, confirm_token }: any) => {
       const row = getMessageById(message_id);
       if (!row) return errorResult(`Unknown message id ${message_id}`);
       if (!row.is_from_me) {
         return errorResult("delete_message removes a message for everyone, which only works for messages YOU sent.");
       }
       const key = reconstructKey({ id: row.id, chat_jid: row.chat_jid, is_from_me: true, sender: row.sender });
-      await deleteMessage(getSock(), key);
-      return textResult(`Requested deletion of ${message_id}`);
+      const outcome = await guardedMutation({
+        action: "delete_message",
+        description: `Delete message ${message_id} for everyone`,
+        confirmToken: confirm_token,
+        run: () => deleteMessage(getSock(), key),
+      });
+      return jsonResult(outcome);
     }),
   );
 

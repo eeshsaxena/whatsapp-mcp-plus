@@ -47,7 +47,10 @@ government IDs, bank codes, API keys, OTP codes) are redacted.
   data dir / `WAMCP_SEND_FILE_ROOTS` — closes an arbitrary-file-write path.
 - Pseudonym aliases use an unguessable random suffix (were sequential), blocking
   alias-injection misrouting and contact-count enumeration.
-- Added `test/harden-test.mjs` (31 checks) covering the above.
+- Destructive actions (delete_message, block_contact, group_leave, group
+  participant-remove) now require the same two-step confirm as sends, so a
+  prompt-injected agent can't fire them in one shot.
+- Added `test/harden-test.mjs` (34 checks) covering the above.
 
 **Performance:** history sync batches each chunk into a single transaction and
 reuses cached prepared statements — ~28x faster bulk message inserts (10k rows:

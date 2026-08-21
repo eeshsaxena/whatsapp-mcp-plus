@@ -223,3 +223,39 @@ export async function guardedSend(opts: {
   const result = await doRun();
   return { status: "done", result, note: "Executed." };
 }
+
+/**
+ * Like guardedSend, but for destructive account actions that have no "recipient"
+ * (delete a message for everyone, block a contact, leave a group, remove a group
+ * participant). Applies the mode gate + the two-step confirm so a prompt-injected
+ * agent cannot fire an irreversible action in one shot. No allowlist/rate-limit
+ * (those are send concepts); the global action-rate cap still applies via
+ * assertMutationsAllowed.
+ */
+export async function guardedMutation(opts: {
+  action: string;
+  description: string;
+  confirmToken?: string;
+  run: () => Promise<unknown>;
+}): Promise<{ status: "done" | "needs_confirmation"; token?: string; result?: unknown; note: string }> {
+  if (opts.confirmToken) {
+    const result = await confirmAction(opts.confirmToken);
+    return { status: "done", result, note: "Confirmed and executed." };
+  }
+
+  assertMutationsAllowed(opts.action);
+
+  if (needsConfirm()) {
+    const token = stageAction(opts.description, opts.run);
+    return {
+      status: "needs_confirmation",
+      token,
+      note:
+        `${opts.description}\n\nThis is a DESTRUCTIVE action. Confirm by calling confirm_action ` +
+        `with token "${token}" (expires in 5 min).`,
+    };
+  }
+
+  const result = await opts.run();
+  return { status: "done", result, note: "Executed." };
+}

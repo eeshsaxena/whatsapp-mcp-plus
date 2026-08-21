@@ -10,9 +10,10 @@ untrusted data that flows into an LLM's context. A crafted message could try to
 make the agent exfiltrate your data or send messages on your behalf. Mitigations:
 - **Read-only by default.** No send/mutating tool works until you opt into
   `assisted` mode.
-- **Confirm-to-send.** In safe modes a send is staged and returns a token; nothing
-  goes out until `confirm_action` is called, so a single injected instruction
-  cannot fire a message.
+- **Confirm-to-act.** In safe modes a send — and every destructive action
+  (`delete_message`, `block_contact`, `group_leave`, removing group participants)
+  — is staged and returns a token; nothing happens until `confirm_action` is
+  called, so a single injected instruction cannot fire an irreversible action.
 - **Injection guard.** Incoming messages that look like instructions to an AI are
   flagged, and message lists returned to the model carry a warning banner telling
   it to treat content as data, not commands.

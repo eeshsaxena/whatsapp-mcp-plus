@@ -12,7 +12,7 @@ import {
   setProfileStatus,
   setProfileName,
 } from "../../whatsapp/actions.ts";
-import { assertMutationsAllowed } from "../../safety/index.ts";
+import { assertMutationsAllowed, guardedMutation } from "../../safety/index.ts";
 import { jsonResult, textResult, safeHandler, errorResult } from "../format.ts";
 import { normalizeRecipient } from "./send.ts";
 
@@ -73,11 +73,26 @@ export function registerChatTools(server: McpServer): void {
 
   server.tool(
     "block_contact",
-    { jid: z.string(), block: z.boolean().default(true).describe("true=block, false=unblock") },
-    safeHandler(async ({ jid, block }: any) => {
-      assertMutationsAllowed("block_contact");
-      await setBlockStatus(getSock(), normalizeRecipient(jid), block);
-      return textResult(`${block ? "Blocked" : "Unblocked"} ${jid}`);
+    {
+      jid: z.string(),
+      block: z.boolean().default(true).describe("true=block, false=unblock"),
+      confirm_token: z.string().optional().describe("Token from a prior staged block, to confirm it"),
+    },
+    safeHandler(async ({ jid, block, confirm_token }: any) => {
+      const target = normalizeRecipient(jid);
+      // Unblocking is benign; blocking is destructive -> stage/confirm.
+      if (!block) {
+        assertMutationsAllowed("block_contact");
+        await setBlockStatus(getSock(), target, false);
+        return textResult(`Unblocked ${jid}`);
+      }
+      const outcome = await guardedMutation({
+        action: "block_contact",
+        description: `Block ${jid}`,
+        confirmToken: confirm_token,
+        run: () => setBlockStatus(getSock(), target, true),
+      });
+      return jsonResult(outcome);
     }),
   );
 
