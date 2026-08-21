@@ -8,8 +8,10 @@ successor to the abandoned `lharries/whatsapp-mcp` (6.1k stars). Goal: stars.
 Strategy in `BUILD_PLAN.md`; launch plan in `LAUNCH.md`.
 
 ## Current state: LIVE-TESTED END TO END. SECURITY-HARDENED. PUSHED. Near launch.
-- `origin/main` @ **4bcc85d** (repo: github.com/eeshsaxena/whatsapp-mcp-plus).
-- Deterministic suite green: **150 checks + MCP stdio smoke (52 tools)**, `npm test`.
+- `origin/main` @ **70a4c26** (repo: github.com/eeshsaxena/whatsapp-mcp-plus).
+- Deterministic suite green: **156 checks + MCP stdio smoke (52 tools)**, `npm test`.
+- **Lint + typecheck clean** (`npm run lint`, `npm run typecheck`); CI runs lint +
+  typecheck + the full suite on Node 24.
 - Working tree: clean except this HANDOFF (uncommitted by design).
 - A real device is **paired** (auth_info/ populated) as **+91 99252 38809**
   (WhatsApp name "Deepak"); `data/whatsapp.db` holds ~2115 real messages + ~14k
@@ -73,17 +75,25 @@ Strategy in `BUILD_PLAN.md`; launch plan in `LAUNCH.md`.
      statements (db.ts runInTransaction). Benchmark 10k inserts 26.5s -> 0.95s (~28x).
    - harden-test -> 31 checks; suite 150.
 
+7. **6d6007c — Destructive ops require confirm.** delete_message, block_contact,
+   group_leave, group_update_participants(remove) now route through guardedMutation
+   (stage->confirm), the no-recipient sibling of guardedSend. add/promote/demote +
+   unblock stay direct.
+8. **a3e240a — Engineering foundation.** ESLint (flat config, typescript-eslint) +
+   `npm run lint`, all clean; CI now runs lint+typecheck+FULL suite on Node 24 (was
+   3 of 9 suites); engines >=24 (node:sqlite is flagless there); repo/bugs/homepage
+   metadata + .editorconfig; removed dead code the linter found.
+9. **70a4c26 — Pen-test pass.** Prototype-pollution defense in the privacy walkers
+   (drop __proto__/constructor/prototype); waCall timeout race no longer leaks an
+   unhandledRejection.
+
 ## Remaining pen-test findings (found, NOT yet fixed)
-- **[MED] Destructive ops lack confirm-to-send.** block_contact, group_leave,
-  delete_message, group_update_participants(remove) are gated only by mode + the
-  action-rate cap — not the two-step confirm that sends use. An injected agent in
-  `assisted` mode could block contacts / leave groups / delete messages. Fix:
-  route these through a guardedMutation() (stage->confirm) like guardedSend, or
-  put them behind a dedicated scope.
 - **[LOW/design] Allowlist "messaged-first" weakening.** isKnownRecipient() treats
   anyone who has messaged the user as a valid send target, so a stranger who
   texts first becomes reachable by an injected agent. Documented tradeoff; could
   require explicit allowlist_add for first contact.
+- **[LOW/note] At-rest encryption** not implemented (node:sqlite has none without a
+  native dep); mitigated by 0700/0600 perms + docs.
 
 Non-security work still open: consent/scopes + setup-wizard (below); live-test
 groups/media/transcription.
