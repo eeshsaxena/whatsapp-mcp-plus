@@ -8,8 +8,10 @@ successor to the abandoned `lharries/whatsapp-mcp` (6.1k stars). Goal: stars.
 Strategy in `BUILD_PLAN.md`; launch plan in `LAUNCH.md`.
 
 ## Current state: LIVE-TESTED END TO END. SECURITY-HARDENED. PUSHED. Near launch.
-- `origin/main` @ **b57db45** (repo: github.com/eeshsaxena/whatsapp-mcp-plus).
-- Deterministic suite green: **164 checks + MCP stdio smoke (52 tools)**, `npm test`.
+- `origin/main` @ **f43e2e5** (repo: github.com/eeshsaxena/whatsapp-mcp-plus).
+- Deterministic suite green: **183 checks + MCP stdio smoke (52 tools)**, `npm test`.
+  Verified with a full-stack integration debug (scopes + privacy + exclude +
+  confirm compose correctly over stdio).
 - **Lint + typecheck clean** (`npm run lint`, `npm run typecheck`); CI runs lint +
   typecheck + the full suite on Node 24.
 - Working tree: clean except this HANDOFF (uncommitted by design).
@@ -118,10 +120,13 @@ live-test groups/media/transcription. Then npm publish + LAUNCH.md.
 - **Safety rails confirmed live:** read-only blocks sends; allowlist blocks a
   stranger; confirm-token flow works.
 
-## Consent scopes + wizard — DONE (b57db45), see "Recently closed" above
-Only deferred piece: per-chat exclude (`WAMCP_EXCLUDE_CHATS`) so chosen chats are
-never returned by read/analytics — not yet built; would slot into read.ts queries
-+ scrubOutput.
+## Consent scopes + wizard + per-chat exclude — ALL DONE
+- Scopes + wizard: b57db45 (see "Recently closed").
+- **Per-chat exclude — DONE (f43e2e5).** `WAMCP_EXCLUDE_CHATS` hides chats from
+  EVERY read/analytics path, enforced via DB views (v_messages/v_chats) that all
+  read queries go through (writes still hit real tables; views rebuild each init).
+  test/exclude-test.mjs (19 checks) proves zero leak. Also fixed: demo/card/rewind
+  generators set WAMCP_PRIVACY=0 so sample screenshots show real names, not aliases.
 
 ## Known issues / leftovers
 - **Leftover test msg**: `[wamcp test] reply B` sits in HIS OWN self-chat
