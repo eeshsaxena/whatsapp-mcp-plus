@@ -86,6 +86,11 @@ cannot send, download media, manage groups, or change your profile until you opt
 in — a disabled scope's tools return a clear "enable this scope" message. Run
 `npm run setup` for a guided, plain-language choice of scopes, mode, and privacy.
 
+**Per-chat exclusion.** `WAMCP_EXCLUDE_CHATS` (comma-separated JIDs) hides chats
+completely: excluded chats never appear in any read or analytics result. This is
+enforced at the database layer via read-only views (`v_messages`/`v_chats`) that
+every query goes through, so an excluded chat cannot leak through any tool.
+
 **Account safety.** This uses an unofficial WhatsApp client (Baileys); misuse can
 get your number banned. Rate limiting, allowlisting, and read-only defaults are
 designed to keep usage in the low-risk zone. In addition to the per-recipient

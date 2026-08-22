@@ -11,6 +11,7 @@ process.env.WAMCP_DATA_DIR = tmp;
 process.env.WAMCP_AUTH_DIR = path.join(tmp, "auth");
 process.env.WAMCP_MODE = "read-only";
 process.env.WAMCP_NO_WA = "1";
+process.env.WAMCP_PRIVACY = "0"; // synthetic demo data — show real sample names
 
 // --- seed -------------------------------------------------------------------
 const db = await import("../dist/db.js");

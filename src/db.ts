@@ -142,7 +142,25 @@ export function initializeDatabase(): DatabaseSync {
     }
   }
 
+  rebuildExclusionViews(db);
   return db;
+}
+
+/**
+ * (Re)create the read-side views that hide excluded chats. ALL read/analytics
+ * queries select from v_messages / v_chats, so a chat listed in
+ * WAMCP_EXCLUDE_CHATS can never leak through any read path. Writes still target
+ * the real tables. Rebuilt on every init so changing the env takes effect.
+ */
+function rebuildExclusionViews(db: DatabaseSync): void {
+  const quote = (s: string) => "'" + String(s).replace(/'/g, "''") + "'";
+  const list = config.excludeChats;
+  const msgWhere = list.length ? `WHERE chat_jid NOT IN (${list.map(quote).join(", ")})` : "";
+  const chatWhere = list.length ? `WHERE jid NOT IN (${list.map(quote).join(", ")})` : "";
+  db.exec(`DROP VIEW IF EXISTS v_messages;`);
+  db.exec(`CREATE VIEW v_messages AS SELECT * FROM messages ${msgWhere};`);
+  db.exec(`DROP VIEW IF EXISTS v_chats;`);
+  db.exec(`CREATE VIEW v_chats AS SELECT * FROM chats ${chatWhere};`);
 }
 
 /** Return the stable alias for a real identifier, creating one on first sight. */
@@ -350,7 +368,7 @@ export function getMessages(
   try {
     let sql = `
       SELECT m.*, c.name as chat_name
-      FROM messages m JOIN chats c ON m.chat_jid = c.jid
+      FROM v_messages m JOIN chats c ON m.chat_jid = c.jid
       WHERE m.chat_jid = ?
     `;
     const params: (string | number)[] = [chatJid];
@@ -371,7 +389,7 @@ export function getLastInteraction(chatJid: string): Message | null {
   try {
     const row = db.prepare(`
       SELECT m.*, c.name as chat_name
-      FROM messages m JOIN chats c ON m.chat_jid = c.jid
+      FROM v_messages m JOIN chats c ON m.chat_jid = c.jid
       WHERE m.chat_jid = ?
       ORDER BY m.timestamp DESC LIMIT 1
     `).get(chatJid) as any | undefined;
@@ -396,11 +414,11 @@ export function getChats(
              COALESCE(c.name, ct.name, ct.notify, ct.phone_number) as name,
              c.last_message_time
              ${includeLastMessage ? `,
-             (SELECT m.content FROM messages m WHERE m.chat_jid = c.jid ORDER BY m.timestamp DESC LIMIT 1) as last_message,
-             (SELECT m.sender FROM messages m WHERE m.chat_jid = c.jid ORDER BY m.timestamp DESC LIMIT 1) as last_sender,
-             (SELECT m.is_from_me FROM messages m WHERE m.chat_jid = c.jid ORDER BY m.timestamp DESC LIMIT 1) as last_is_from_me
+             (SELECT m.content FROM v_messages m WHERE m.chat_jid = c.jid ORDER BY m.timestamp DESC LIMIT 1) as last_message,
+             (SELECT m.sender FROM v_messages m WHERE m.chat_jid = c.jid ORDER BY m.timestamp DESC LIMIT 1) as last_sender,
+             (SELECT m.is_from_me FROM v_messages m WHERE m.chat_jid = c.jid ORDER BY m.timestamp DESC LIMIT 1) as last_is_from_me
              ` : ""}
-      FROM chats c LEFT JOIN contacts ct ON c.jid = ct.jid
+      FROM v_chats c LEFT JOIN contacts ct ON c.jid = ct.jid
     `;
     const params: (string | number)[] = [];
     if (query) {
@@ -425,7 +443,7 @@ export function getGroupChats(limit = 50, page = 0): Chat[] {
   try {
     const rows = db.prepare(`
       SELECT c.jid, COALESCE(c.name, ct.name) as name, c.last_message_time
-      FROM chats c LEFT JOIN contacts ct ON c.jid = ct.jid
+      FROM v_chats c LEFT JOIN contacts ct ON c.jid = ct.jid
       WHERE c.jid LIKE '%@g.us'
       ORDER BY c.last_message_time DESC NULLS LAST
       LIMIT ? OFFSET ?
@@ -445,11 +463,11 @@ export function getChat(jid: string, includeLastMessage = true): Chat | null {
              COALESCE(c.name, ct.name, ct.notify, ct.phone_number) as name,
              c.last_message_time
              ${includeLastMessage ? `,
-             (SELECT m.content FROM messages m WHERE m.chat_jid = c.jid ORDER BY m.timestamp DESC LIMIT 1) as last_message,
-             (SELECT m.sender FROM messages m WHERE m.chat_jid = c.jid ORDER BY m.timestamp DESC LIMIT 1) as last_sender,
-             (SELECT m.is_from_me FROM messages m WHERE m.chat_jid = c.jid ORDER BY m.timestamp DESC LIMIT 1) as last_is_from_me
+             (SELECT m.content FROM v_messages m WHERE m.chat_jid = c.jid ORDER BY m.timestamp DESC LIMIT 1) as last_message,
+             (SELECT m.sender FROM v_messages m WHERE m.chat_jid = c.jid ORDER BY m.timestamp DESC LIMIT 1) as last_sender,
+             (SELECT m.is_from_me FROM v_messages m WHERE m.chat_jid = c.jid ORDER BY m.timestamp DESC LIMIT 1) as last_is_from_me
              ` : ""}
-      FROM chats c LEFT JOIN contacts ct ON c.jid = ct.jid
+      FROM v_chats c LEFT JOIN contacts ct ON c.jid = ct.jid
       WHERE c.jid = ?
     `;
     const row = db.prepare(sql).get(jid) as any | undefined;
@@ -465,7 +483,7 @@ export function getMessageById(messageId: string): Message | null {
   try {
     const row = db.prepare(`
       SELECT m.*, c.name as chat_name
-      FROM messages m JOIN chats c ON m.chat_jid = c.jid
+      FROM v_messages m JOIN chats c ON m.chat_jid = c.jid
       WHERE m.id = ? LIMIT 1
     `).get(messageId) as any | undefined;
     return row ? rowToMessage(row) : null;
@@ -489,7 +507,7 @@ export function getRawMessage(messageId: string): WAMessage | null {
   const db = getDb();
   try {
     const row = db.prepare(
-      `SELECT raw FROM messages WHERE id = ? AND raw IS NOT NULL LIMIT 1`,
+      `SELECT raw FROM v_messages WHERE id = ? AND raw IS NOT NULL LIMIT 1`,
     ).get(messageId) as any | undefined;
     if (!row?.raw) return null;
     return proto.WebMessageInfo.decode(Buffer.from(row.raw, "base64")) as WAMessage;
@@ -509,7 +527,7 @@ export function getMessagesAround(
   try {
     const targetRow = db.prepare(`
       SELECT m.*, c.name as chat_name
-      FROM messages m JOIN chats c ON m.chat_jid = c.jid
+      FROM v_messages m JOIN chats c ON m.chat_jid = c.jid
       WHERE m.id = ?
     `).get(messageId) as any | undefined;
     if (!targetRow) return result;
@@ -517,11 +535,11 @@ export function getMessagesAround(
     const ts = result.target.timestamp.toISOString();
     const chatJid = result.target.chat_jid;
     result.before = (db.prepare(`
-      SELECT m.*, c.name as chat_name FROM messages m JOIN chats c ON m.chat_jid = c.jid
+      SELECT m.*, c.name as chat_name FROM v_messages m JOIN chats c ON m.chat_jid = c.jid
       WHERE m.chat_jid = ? AND m.timestamp < ? ORDER BY m.timestamp DESC LIMIT ?
     `).all(chatJid, ts, before) as any[]).map(rowToMessage).reverse();
     result.after = (db.prepare(`
-      SELECT m.*, c.name as chat_name FROM messages m JOIN chats c ON m.chat_jid = c.jid
+      SELECT m.*, c.name as chat_name FROM v_messages m JOIN chats c ON m.chat_jid = c.jid
       WHERE m.chat_jid = ? AND m.timestamp > ? ORDER BY m.timestamp ASC LIMIT ?
     `).all(chatJid, ts, after) as any[]).map(rowToMessage);
     return result;
@@ -552,7 +570,7 @@ export function searchMessages(searchQuery: string, chatJid?: string | null, lim
   try {
     let sql = `
       SELECT m.*, COALESCE(c.name, ct.name, ct.notify, ct.phone_number) as chat_name
-      FROM messages m JOIN chats c ON m.chat_jid = c.jid
+      FROM v_messages m JOIN chats c ON m.chat_jid = c.jid
       LEFT JOIN contacts ct ON c.jid = ct.jid
       WHERE LOWER(m.content) LIKE LOWER(?) ESCAPE '\\'
     `;
@@ -581,14 +599,14 @@ export function isKnownRecipient(jid: string): boolean {
     // 1. Explicitly allowlisted — always trusted.
     if (db.prepare(`SELECT 1 FROM allowlist WHERE jid = ? LIMIT 1`).get(jid)) return true;
     // 2. Established relationship: you have SENT to this chat before.
-    if (db.prepare(`SELECT 1 FROM messages WHERE chat_jid = ? AND is_from_me = 1 LIMIT 1`).get(jid)) return true;
+    if (db.prepare(`SELECT 1 FROM v_messages WHERE chat_jid = ? AND is_from_me = 1 LIMIT 1`).get(jid)) return true;
     // 3. A group you are a member of (synced into your chat list).
-    if (jid.endsWith("@g.us") && db.prepare(`SELECT 1 FROM chats WHERE jid = ? LIMIT 1`).get(jid)) return true;
+    if (jid.endsWith("@g.us") && db.prepare(`SELECT 1 FROM v_chats WHERE jid = ? LIMIT 1`).get(jid)) return true;
     // 4. Looser signals, OFF by default (a stranger who texts first, or anyone in
     //    the synced address book, is otherwise NOT auto-trusted — a prompt-injected
     //    agent can't exfiltrate to them without an explicit allowlist_add).
     if (config.allowlistContacts && db.prepare(`SELECT 1 FROM contacts WHERE jid = ? LIMIT 1`).get(jid)) return true;
-    if (config.allowlistInbound && db.prepare(`SELECT 1 FROM messages WHERE chat_jid = ? AND is_from_me = 0 LIMIT 1`).get(jid)) return true;
+    if (config.allowlistInbound && db.prepare(`SELECT 1 FROM v_messages WHERE chat_jid = ? AND is_from_me = 0 LIMIT 1`).get(jid)) return true;
     return false;
   } catch (e) {
     console.error("isKnownRecipient error", e);
@@ -681,7 +699,7 @@ export function computeTopWords(
 ): { word: string; count: number }[] {
   const db = getDb();
   const since = sinceIso ?? "1970-01-01T00:00:00.000Z";
-  let sql = `SELECT content FROM messages WHERE timestamp >= ?`;
+  let sql = `SELECT content FROM v_messages WHERE timestamp >= ?`;
   const params: (string | number)[] = [since];
   if (chatJid) { sql += ` AND chat_jid = ?`; params.push(chatJid); }
   const rows = db.prepare(sql).all(...params) as any[];
@@ -717,14 +735,14 @@ export function computeWrapped(sinceIso?: string | null, topN = 10): WrappedStat
            MIN(timestamp) as first_ts,
            MAX(timestamp) as last_ts,
            COUNT(DISTINCT chat_jid) as active_chats
-    FROM messages WHERE timestamp >= ?
+    FROM v_messages WHERE timestamp >= ?
   `).get(since) as any;
 
   const topContacts = (db.prepare(`
     SELECT m.chat_jid as jid,
            COALESCE(c.name, ct.name, ct.notify, ct.phone_number) as name,
            COUNT(*) as count
-    FROM messages m
+    FROM v_messages m
     JOIN chats c ON m.chat_jid = c.jid
     LEFT JOIN contacts ct ON c.jid = ct.jid
     WHERE m.timestamp >= ? AND m.chat_jid NOT LIKE '%@g.us'
@@ -736,7 +754,7 @@ export function computeWrapped(sinceIso?: string | null, topN = 10): WrappedStat
   }));
 
   // Busiest hour / day computed in JS from timestamps (portable across sqlite builds).
-  const rows = db.prepare(`SELECT timestamp FROM messages WHERE timestamp >= ?`).all(since) as any[];
+  const rows = db.prepare(`SELECT timestamp FROM v_messages WHERE timestamp >= ?`).all(since) as any[];
   const hourCounts = new Array(24).fill(0);
   const dayCounts: Record<string, number> = {};
   const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -758,7 +776,7 @@ export function computeWrapped(sinceIso?: string | null, topN = 10): WrappedStat
 
   // Emoji frequency across message content.
   const emojiCounts: Record<string, number> = {};
-  const contentRows = db.prepare(`SELECT content FROM messages WHERE timestamp >= ?`).all(since) as any[];
+  const contentRows = db.prepare(`SELECT content FROM v_messages WHERE timestamp >= ?`).all(since) as any[];
   for (const r of contentRows) {
     for (const e of extractEmojis(r.content)) emojiCounts[e] = (emojiCounts[e] ?? 0) + 1;
   }
@@ -769,7 +787,7 @@ export function computeWrapped(sinceIso?: string | null, topN = 10): WrappedStat
 
   // Words I sent.
   const myContent = db.prepare(
-    `SELECT content FROM messages WHERE is_from_me = 1 AND timestamp >= ?`,
+    `SELECT content FROM v_messages WHERE is_from_me = 1 AND timestamp >= ?`,
   ).all(since) as any[];
   let wordsSent = 0;
   for (const r of myContent) {
@@ -830,7 +848,7 @@ export function computeChatStats(chatJid: string): ChatStats {
   const db = getDb();
   const chat = getChat(chatJid, false);
   const rows = db.prepare(
-    `SELECT content, timestamp, is_from_me FROM messages WHERE chat_jid = ? ORDER BY timestamp ASC`,
+    `SELECT content, timestamp, is_from_me FROM v_messages WHERE chat_jid = ? ORDER BY timestamp ASC`,
   ).all(chatJid) as any[];
 
   let sent = 0, received = 0;
@@ -882,7 +900,7 @@ export function exportChat(chatJid: string, format: "markdown" | "text" = "markd
   const chat = getChat(chatJid, false);
   const db = getDb();
   const rows = db.prepare(
-    `SELECT content, timestamp, is_from_me, sender FROM messages WHERE chat_jid = ? ORDER BY timestamp ASC LIMIT ?`,
+    `SELECT content, timestamp, is_from_me, sender FROM v_messages WHERE chat_jid = ? ORDER BY timestamp ASC LIMIT ?`,
   ).all(chatJid, limit) as any[];
 
   const title = chat?.name ?? chatJid.split("@")[0];
@@ -913,7 +931,7 @@ export interface ContactInfo {
 export function getContactInfo(jid: string): ContactInfo {
   const db = getDb();
   const chat = getChat(jid, true);
-  const cnt = db.prepare(`SELECT COUNT(*) as n FROM messages WHERE chat_jid = ?`).get(jid) as any;
+  const cnt = db.prepare(`SELECT COUNT(*) as n FROM v_messages WHERE chat_jid = ?`).get(jid) as any;
   return {
     jid,
     name: chat?.name ?? null,
@@ -943,7 +961,7 @@ export function computeResponseLeaderboard(minResponses = 3, limit = 15): {
 } {
   const db = getDb();
   const chatRows = db.prepare(
-    `SELECT DISTINCT chat_jid FROM messages WHERE chat_jid NOT LIKE '%@g.us'`,
+    `SELECT DISTINCT chat_jid FROM v_messages WHERE chat_jid NOT LIKE '%@g.us'`,
   ).all() as any[];
 
   const entries: ResponseLeaderEntry[] = [];

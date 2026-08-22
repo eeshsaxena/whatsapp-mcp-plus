@@ -8,6 +8,7 @@ import { fileURLToPath } from "node:url";
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "wamcp-card-"));
 process.env.WAMCP_DATA_DIR = tmp;
 process.env.WAMCP_AUTH_DIR = path.join(tmp, "auth");
+process.env.WAMCP_PRIVACY = "0"; // synthetic demo data — show real sample names
 
 const db = await import("../dist/db.js");
 const { renderWrappedSVG } = await import("../dist/analytics/card.js");

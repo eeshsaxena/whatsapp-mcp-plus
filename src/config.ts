@@ -85,6 +85,12 @@ export interface Config {
    * rest (media, send, groups, profile) via WAMCP_SCOPES or `npm run setup`.
    */
   scopes: Set<string>;
+  /**
+   * Chat JIDs to fully hide from the assistant: excluded chats never appear in
+   * any read/analytics result (enforced via DB views). Set via WAMCP_EXCLUDE_CHATS
+   * (comma-separated JIDs, e.g. "12345@s.whatsapp.net,678@g.us").
+   */
+  excludeChats: string[];
 }
 
 /** All recognized feature scopes, in a stable display order. */
@@ -160,6 +166,8 @@ export const config: Config = {
   sendFileRoots: (process.env.WAMCP_SEND_FILE_ROOTS || "")
     .split(",").map((s) => s.trim()).filter(Boolean),
   scopes: resolveScopes(),
+  excludeChats: (process.env.WAMCP_EXCLUDE_CHATS || "")
+    .split(",").map((s) => s.trim()).filter(Boolean),
 };
 
 export function ensureDirs(): void {

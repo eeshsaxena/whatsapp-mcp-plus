@@ -30,6 +30,10 @@ confirm-to-send, prompt-injection guard.
 opt-in. `npm run setup` is a guided wizard that writes `.env` and prints the MCP
 client config. `get_status` reports the active scopes.
 
+**Per-chat exclusion:** `WAMCP_EXCLUDE_CHATS` hides chosen chats completely from
+every read/analytics path, enforced via DB views (`v_messages`/`v_chats`) so it
+cannot be bypassed.
+
 **Privacy (default ON, `WAMCP_PRIVACY`):** before results reach the LLM,
 identifiers (JIDs, phone numbers, emails, contact names) are pseudonymized to
 reversible local aliases, and structured secrets in message text (payment cards,
